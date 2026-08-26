@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
 import { db } from "@/db";
 import { menuItems } from "@/db/schema";
-import { MenuForm } from "../../../menu-form";
+import { MenuForm, PesanError } from "../../../menu-form";
 
 export const metadata = {
   title: "Edit Menu — Admin Kopi Senja",
@@ -12,10 +12,12 @@ export const metadata = {
 
 export default async function EditMenuPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
-  const { id } = await params;
+  const [{ id }, { error }] = await Promise.all([params, searchParams]);
   const itemId = Number(id);
 
   if (!Number.isInteger(itemId)) notFound();
@@ -42,6 +44,7 @@ export default async function EditMenuPage({
         Edit: {item.nama}
       </h1>
 
+      <PesanError kode={error} />
       <MenuForm item={item} />
     </div>
   );

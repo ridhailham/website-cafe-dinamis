@@ -8,6 +8,23 @@ const labelClass = "mb-1 block text-sm font-medium text-stone-700";
 const inputClass =
   "w-full rounded-lg border border-stone-300 px-4 py-2.5 text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-600/20";
 
+export function PesanError({ kode }: { kode?: string }) {
+  if (!kode) return null;
+
+  const pesan: Record<string, string> = {
+    tipe: "File harus berupa gambar (JPG, PNG, atau WebP).",
+    ukuran: "Ukuran foto maksimal 5 MB.",
+    token:
+      "Fitur foto belum aktif karena penyimpanan Vercel Blob belum terhubung. Menu tetap tersimpan tanpa foto — foto akan bisa diunggah setelah website di-deploy.",
+  };
+
+  return (
+    <p className="mb-5 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+      {pesan[kode] ?? "Terjadi kesalahan. Coba lagi."}
+    </p>
+  );
+}
+
 export function MenuForm({ item }: Props) {
   const sedangEdit = Boolean(item);
 
@@ -97,6 +114,37 @@ export function MenuForm({ item }: Props) {
           placeholder="Deskripsi singkat menu..."
           className={inputClass}
         />
+      </div>
+
+      <div>
+        <label htmlFor="foto" className={labelClass}>
+          Foto Menu
+        </label>
+        <input
+          id="foto"
+          name="foto"
+          type="file"
+          accept="image/*"
+          className="w-full rounded-lg border border-dashed border-stone-300 px-4 py-2.5 text-sm text-stone-600 file:mr-3 file:rounded-full file:border-0 file:bg-amber-50 file:px-4 file:py-1.5 file:text-xs file:font-semibold file:text-amber-700 hover:file:bg-amber-100"
+        />
+        <p className="mt-1 text-xs text-stone-400">
+          JPG/PNG/WebP, maksimal 5 MB.
+        </p>
+
+        {item?.gambarUrl && (
+          <div className="mt-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={item.gambarUrl}
+              alt={`Foto ${item.nama}`}
+              className="h-32 w-full max-w-[240px] rounded-lg border border-stone-200 object-cover"
+            />
+            <p className="mt-1 text-xs text-stone-400">
+              Foto saat ini. Biarkan kolom di atas kosong bila tidak ingin
+              mengganti.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center justify-between border-t border-stone-100 pt-5">

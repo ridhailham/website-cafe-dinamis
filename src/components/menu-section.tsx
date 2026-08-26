@@ -34,24 +34,35 @@ export function MenuSection({ items }: Props) {
             {items.map((item) => (
               <article
                 key={item.id}
-                className="flex flex-col rounded-2xl border border-stone-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+                className="flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition-shadow hover:shadow-md"
               >
-                <span
-                  className={`mb-3 w-fit rounded-full px-2.5 py-0.5 text-xs font-semibold ${kategoriWarna[item.kategori] ?? "bg-stone-100 text-stone-700"}`}
-                >
-                  {item.kategori}
-                </span>
-                <h3 className="font-serif text-lg font-bold text-stone-900">
-                  {item.nama}
-                </h3>
-                {item.deskripsi && (
-                  <p className="mt-1 flex-1 text-sm leading-relaxed text-stone-600">
-                    {item.deskripsi}
-                  </p>
+                {item.gambarUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.gambarUrl}
+                    alt={`Foto ${item.nama}`}
+                    loading="lazy"
+                    className="aspect-[4/3] w-full object-cover"
+                  />
                 )}
-                <p className="mt-4 text-lg font-bold text-amber-700">
-                  {formatHarga(item.harga)}
-                </p>
+                <div className="flex flex-1 flex-col p-5">
+                  <span
+                    className={`mb-3 w-fit rounded-full px-2.5 py-0.5 text-xs font-semibold ${kategoriWarna[item.kategori] ?? "bg-stone-100 text-stone-700"}`}
+                  >
+                    {item.kategori}
+                  </span>
+                  <h3 className="font-serif text-lg font-bold text-stone-900">
+                    {item.nama}
+                  </h3>
+                  {item.deskripsi && (
+                    <p className="mt-1 flex-1 text-sm leading-relaxed text-stone-600">
+                      {item.deskripsi}
+                    </p>
+                  )}
+                  <p className="mt-4 text-lg font-bold text-amber-700">
+                    {formatHarga(item.harga)}
+                  </p>
+                </div>
               </article>
             ))}
           </div>

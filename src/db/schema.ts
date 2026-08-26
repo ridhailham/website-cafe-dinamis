@@ -15,6 +15,7 @@ export const menuItems = pgTable("menu_items", {
   kategori: text("kategori").notNull().default("Kopi"),
   tersedia: boolean("tersedia").notNull().default(true),
   urutan: integer("urutan").notNull().default(0),
+  gambarUrl: text("gambar_url"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

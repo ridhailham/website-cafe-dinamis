@@ -1,12 +1,18 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { MenuForm } from "../../menu-form";
+import { MenuForm, PesanError } from "../../menu-form";
 
 export const metadata = {
   title: "Tambah Menu — Admin Kopi Senja",
 };
 
-export default function TambahMenuPage() {
+export default async function TambahMenuPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+
   return (
     <div className="mx-auto max-w-2xl">
       <Link
@@ -19,6 +25,7 @@ export default function TambahMenuPage() {
 
       <h1 className="mb-6 text-xl font-bold text-stone-900">Tambah Menu Baru</h1>
 
+      <PesanError kode={error} />
       <MenuForm />
     </div>
   );
