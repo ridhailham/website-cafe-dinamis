@@ -101,7 +101,7 @@ async function main() {
   } else {
     await db.insert(bisnis).values({
       waNomor: "6281234567890",
-      waTeks: "Halo Kopi Senja! Saya mau tanya-tanya dulu.",
+      waTeks: "Halo Admin! Saya mau tanya-tanya dulu.",
       alamat: "Jl. Raya Contoh No. 123, Dago, Bandung, Jawa Barat 40135",
     });
     console.log("Berhasil mengisi data bisnis awal.");

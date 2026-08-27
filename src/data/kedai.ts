@@ -5,7 +5,7 @@ export const kedai = {
     "Kedai kopi lokal dengan biji pilihan dari petani Indonesia. Tempat berkumpulnya cerita, tawa, dan aroma kopi yang diseduh dengan sepenuh hati.",
   wa: {
     nomor: "6281234567890",
-    teks: "Halo Kopi Senja! Saya mau tanya-tanya dulu.",
+    teks: "Halo Admin! Saya mau tanya-tanya dulu.",
     get url() {
       return `https://wa.me/${this.nomor}?text=${encodeURIComponent(this.teks)}`;
     },
