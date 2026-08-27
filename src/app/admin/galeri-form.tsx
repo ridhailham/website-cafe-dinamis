@@ -60,11 +60,11 @@ export function GaleriForm({ item }: Props) {
           className="w-full rounded-lg border border-dashed border-stone-300 px-4 py-2.5 text-sm text-stone-600 file:mr-3 file:rounded-full file:border-0 file:bg-amber-50 file:px-4 file:py-1.5 file:text-xs file:font-semibold file:text-amber-700 hover:file:bg-amber-100"
         />
         <p className="mt-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5 text-sm font-semibold text-amber-800">
-          JPG/PNG/WebP, maksimal 5 MB. Gunakan foto berorientasi lanskap{" "}
+          JPG/PNG/WebP, maksimal 5 MB. Foto harus rasio{" "}
           <span className="font-bold underline decoration-2 underline-offset-2">
             4:3
-          </span>{" "}
-          agar tampil utuh.
+          </span>
+          .
         </p>
 
         {preview && (
