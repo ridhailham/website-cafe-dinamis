@@ -4,11 +4,6 @@ import { useRef, useState } from "react";
 import type { MenuItem } from "@/db/schema";
 import { KATEGORI_OPTIONS, formatHarga } from "@/lib/constants";
 
-const kategoriWarna: Record<string, string> = {
-  Minuman: "bg-amber-100 text-amber-800",
-  Makanan: "bg-emerald-100 text-emerald-800",
-};
-
 type Props = { items: MenuItem[] };
 
 export function MenuSection({ items }: Props) {
@@ -92,18 +87,13 @@ export function MenuSection({ items }: Props) {
                                   src={item.gambarUrl || "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=600&h=450&fit=crop"}
                                   alt={`Foto ${item.nama}`}
                                   loading="lazy"
-                                  className="aspect-[4/3] w-full shrink-0 object-cover"
+                                  className="aspect-[3/2] w-full shrink-0 object-cover"
                                 />
-                                <div className="flex flex-1 flex-col p-5">
-                                  <span
-                                    className={`mb-3 w-fit rounded-full px-2.5 py-0.5 text-xs font-semibold ${kategoriWarna[item.kategori] ?? "bg-stone-100 text-stone-700"}`}
-                                  >
-                                    {item.kategori}
-                                  </span>
-                                  <h3 className="line-clamp-2 min-h-[3.5rem] font-serif text-xl font-bold text-stone-900">
+                                <div className="flex flex-1 flex-col p-4">
+                                  <h3 className="line-clamp-2 min-h-[3rem] font-serif text-xl font-bold text-stone-900">
                                     {item.nama}
                                   </h3>
-                                  <p className="mt-1 line-clamp-2 min-h-[2.75rem] text-sm leading-relaxed text-stone-600">
+                                  <p className="mt-1 line-clamp-2 min-h-[2.5rem] text-sm leading-relaxed text-stone-600">
                                     {item.deskripsi}
                                   </p>
                                   <p className="mt-auto text-xl font-bold text-amber-700">
