@@ -2,6 +2,7 @@ import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { heroImage, kedai } from "@/data/kedai";
 import { WhatsAppIcon } from "./whatsapp-icon";
+import { OpenStatus } from "./open-status";
 
 export function Hero() {
   return (
@@ -17,6 +18,9 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
 
       <div className="relative z-10 mx-auto max-w-3xl px-4 py-24 text-center">
+        <div className="mb-5 flex justify-center">
+          <OpenStatus />
+        </div>
         <p className="mb-4 text-sm font-medium uppercase tracking-[0.3em] text-amber-400">
           Kedai Kopi Bandung
         </p>

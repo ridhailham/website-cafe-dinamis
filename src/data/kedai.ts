@@ -16,6 +16,24 @@ export const kedai = {
     { hari: "Senin – Jumat", jam: "08.00 – 22.00" },
     { hari: "Sabtu – Minggu", jam: "07.00 – 23.00" },
   ],
+  jamOperasional: {
+    minggu: { buka: 7, tutup: 23 },
+    senin: { buka: 8, tutup: 22 },
+    selasa: { buka: 8, tutup: 22 },
+    rabu: { buka: 8, tutup: 22 },
+    kamis: { buka: 8, tutup: 22 },
+    jumat: { buka: 8, tutup: 22 },
+    sabtu: { buka: 7, tutup: 23 },
+  } as Record<
+    | "minggu"
+    | "senin"
+    | "selasa"
+    | "rabu"
+    | "kamis"
+    | "jumat"
+    | "sabtu",
+    { buka: number; tutup: number }
+  >,
   mapsEmbed:
     "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3961.153!2d107.6191!3d-6.8675!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzbCsDUyJzAzLjAiUyAxMDfCsDM3JzA4LjciRQ!5e0!3m2!1sid!2sid!4v1700000000000",
 };
