@@ -37,6 +37,12 @@ export default async function PanelLayout({
             >
               Kelola Menu
             </Link>
+            <Link
+              href="/admin/galeri"
+              className="text-sm text-stone-600 hover:text-amber-700"
+            >
+              Galeri
+            </Link>
           </div>
 
           <div className="flex items-center gap-3">

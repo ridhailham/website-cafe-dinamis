@@ -1,6 +1,6 @@
 import { asc } from "drizzle-orm";
 import { db } from "@/db";
-import { menuItems } from "@/db/schema";
+import { galleryItems, menuItems } from "@/db/schema";
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
 import { MenuSection } from "@/components/menu-section";
@@ -16,13 +16,18 @@ export default async function Home() {
     .from(menuItems)
     .orderBy(asc(menuItems.urutan), asc(menuItems.id));
 
+  const galeri = await db
+    .select()
+    .from(galleryItems)
+    .orderBy(asc(galleryItems.urutan), asc(galleryItems.id));
+
   return (
     <>
       <Navbar />
       <main className="flex-1">
         <Hero />
         <MenuSection items={items} />
-        <Gallery />
+        <Gallery items={galeri} />
         <LocationSection />
       </main>
       <Footer />

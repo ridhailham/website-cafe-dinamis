@@ -58,8 +58,17 @@ const DATA_AWAL = [
   { nama: "Cheesecake Slice", deskripsi: "New York style cheesecake dengan berry compote", harga: 25000, kategori: "Makanan", urutan: 50, gambarUrl: "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?q=80&w=600&h=450&fit=crop" },
 ];
 
+const DATA_GALERI = [
+  { gambarUrl: "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?q=80&w=1200&auto=format&fit=crop", alt: "Suasana interior kedai" },
+  { gambarUrl: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=1200&auto=format&fit=crop", alt: "Barista menuang latte art" },
+  { gambarUrl: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=1200&auto=format&fit=crop", alt: "Cangkir kopi di atas meja kayu" },
+  { gambarUrl: "https://images.unsplash.com/photo-1521017432531-fbd92d768814?q=80&w=1200&auto=format&fit=crop", alt: "Pelanggan menikmati kopi" },
+  { gambarUrl: "https://images.unsplash.com/photo-1442512595331-e89e73853f31?q=80&w=1200&auto=format&fit=crop", alt: "Proses seduh manual brew" },
+  { gambarUrl: "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?q=80&w=1200&auto=format&fit=crop", alt: "Croissant dan kopi" },
+];
+
 async function main() {
-  const [{ db }, { menuItems }] = await Promise.all([
+  const [{ db }, { galleryItems, menuItems }] = await Promise.all([
     import("./index"),
     import("./schema"),
   ]);
@@ -68,11 +77,22 @@ async function main() {
 
   if (existing.length > 0) {
     console.log(`Tabel sudah berisi ${existing.length} item — seed dilewati.`);
-    return;
+  } else {
+    await db.insert(menuItems).values(DATA_AWAL);
+    console.log(`Berhasil mengisi ${DATA_AWAL.length} item menu awal.`);
   }
 
-  await db.insert(menuItems).values(DATA_AWAL);
-  console.log(`Berhasil mengisi ${DATA_AWAL.length} item menu awal.`);
+  const existingGaleri = await db.select().from(galleryItems);
+  if (existingGaleri.length > 0) {
+    console.log(
+      `Galeri sudah berisi ${existingGaleri.length} foto — seed galeri dilewati.`
+    );
+  } else {
+    await db
+      .insert(galleryItems)
+      .values(DATA_GALERI.map((g, i) => ({ ...g, urutan: i + 1 })));
+    console.log(`Berhasil mengisi ${DATA_GALERI.length} foto galeri awal.`);
+  }
 }
 
 main()

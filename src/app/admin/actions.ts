@@ -6,7 +6,7 @@ import { notFound, redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { put, del } from "@vercel/blob";
 import { db } from "@/db";
-import { menuItems } from "@/db/schema";
+import { galleryItems, menuItems } from "@/db/schema";
 import { createSession, destroySession, verifySessionFromToken } from "@/lib/auth";
 
 const COOKIE_NAME = "kopi_session";
@@ -192,4 +192,74 @@ export async function deleteItem(formData: FormData) {
   }
 
   redirect("/admin");
+}
+
+async function simpanFotoGaleri(
+  formData: FormData,
+  tujuanForm: string
+): Promise<string | null> {
+  const file = formData.get("foto");
+
+  if (!(file instanceof File) || file.size === 0) return null;
+
+  if (!file.type.startsWith("image/")) {
+    redirect(`${tujuanForm}?error=tipe`);
+  }
+  if (file.size > MAX_FOTO_BYTES) {
+    redirect(`${tujuanForm}?error=ukuran`);
+  }
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    redirect(`${tujuanForm}?error=token`);
+  }
+
+  const ekstensi =
+    (file.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") ||
+    "jpg";
+  const uniqueId = crypto.randomUUID().slice(0, 8);
+
+  try {
+    const blob = await put(`galeri/suasana-${uniqueId}.${ekstensi}`, file, {
+      access: "public",
+    });
+    return blob.url;
+  } catch (err) {
+    console.warn("[blob] Gagal meng-upload foto galeri:", err);
+    redirect(`${tujuanForm}?error=upload`);
+  }
+}
+
+export async function tambahGaleri(formData: FormData) {
+  await assertAdmin();
+
+  const gambarUrl = await simpanFotoGaleri(formData, "/admin/galeri/baru");
+  if (!gambarUrl) redirect("/admin/galeri/baru?error=foto");
+
+  const urutan = Math.round(Number(formData.get("urutan")) || 0);
+  const alt = String(formData.get("alt") ?? "").trim();
+
+  await db.insert(galleryItems).values({ gambarUrl, alt, urutan });
+
+  revalidatePath("/");
+  revalidatePath("/admin/galeri");
+  redirect("/admin/galeri");
+}
+
+export async function hapusGaleri(formData: FormData) {
+  await assertAdmin();
+  const id = Number(formData.get("id"));
+
+  if (Number.isInteger(id)) {
+    const [item] = await db
+      .select()
+      .from(galleryItems)
+      .where(eq(galleryItems.id, id))
+      .limit(1);
+
+    await db.delete(galleryItems).where(eq(galleryItems.id, id));
+    await hapusFotoLama(item?.gambarUrl ?? null);
+    revalidatePath("/");
+    revalidatePath("/admin/galeri");
+  }
+
+  redirect("/admin/galeri");
 }
