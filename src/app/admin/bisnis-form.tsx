@@ -14,24 +14,20 @@ const labelClass = "mb-1 block text-sm font-medium text-stone-700";
 const inputClass =
   "w-full rounded-lg border border-stone-300 px-4 py-2.5 text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-600/20";
 
+let idBaris = 0;
+
 export function BisnisForm({ bisnis, jamBuka = [] }: Props) {
-  const [daftarJam, setDaftarJam] = useState<
-    { hari: string; jam: string }[]
-  >(
-    jamBuka.length > 0
-      ? jamBuka.map((j) => ({ hari: j.hari, jam: j.jam }))
-      : [{ hari: "", jam: "" }]
+  const [daftarJam, setDaftarJam] = useState<{ id: number; hari: string; jam: string }[]>(
+    () =>
+      jamBuka.length > 0
+        ? jamBuka.map((j) => ({ id: idBaris++, hari: j.hari, jam: j.jam }))
+        : [{ id: idBaris++, hari: "", jam: "" }]
   );
 
-  const ubahJam = (idx: number, key: "hari" | "jam", val: string) => {
-    setDaftarJam((prev) =>
-      prev.map((j, i) => (i === idx ? { ...j, [key]: val } : j))
-    );
-  };
-
-  const tambahJam = () => setDaftarJam((prev) => [...prev, { hari: "", jam: "" }]);
-  const hapusJam = (idx: number) =>
-    setDaftarJam((prev) => prev.filter((_, i) => i !== idx));
+  const tambahJam = () =>
+    setDaftarJam((prev) => [...prev, { id: idBaris++, hari: "", jam: "" }]);
+  const hapusJam = (id: number) =>
+    setDaftarJam((prev) => prev.filter((r) => r.id !== id));
 
   return (
     <form
@@ -95,27 +91,25 @@ export function BisnisForm({ bisnis, jamBuka = [] }: Props) {
       <div>
         <p className="mb-2 text-sm font-medium text-stone-700">Hari &amp; Jam Buka</p>
         <div className="space-y-2">
-          {daftarJam.map((baris, idx) => (
-            <div key={idx} className="flex items-center gap-2">
+          {daftarJam.map((baris) => (
+            <div key={baris.id} className="flex items-center gap-2">
               <input
                 name="jam_hari"
                 type="text"
-                value={baris.hari}
-                onChange={(e) => ubahJam(idx, "hari", e.target.value)}
+                defaultValue={baris.hari}
                 placeholder="cth. Senin – Jumat"
                 className={`${inputClass} flex-1`}
               />
               <input
                 name="jam_jam"
                 type="text"
-                value={baris.jam}
-                onChange={(e) => ubahJam(idx, "jam", e.target.value)}
+                defaultValue={baris.jam}
                 placeholder="cth. 08.00 – 22.00"
                 className={`${inputClass} flex-1`}
               />
               <button
                 type="button"
-                onClick={() => hapusJam(idx)}
+                onClick={() => hapusJam(baris.id)}
                 disabled={daftarJam.length === 1}
                 aria-label="Hapus baris jam"
                 className="shrink-0 rounded-lg p-2 text-stone-400 transition-colors hover:bg-red-50 hover:text-red-600 disabled:opacity-30"
