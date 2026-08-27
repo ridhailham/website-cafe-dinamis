@@ -49,21 +49,3 @@ export const galeri = [
 
 export const heroImage =
   "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=1600&auto=format&fit=crop";
-
-export const testimoni = [
-  {
-    nama: "Rina Kartika",
-    teks: "Kopi Susu Senja-juara! Suasananya juga nyaman buat kerja atau sekadar nongkrong bareng teman.",
-    bintang: 5,
-  },
-  {
-    nama: "Dimas Prasetyo",
-    teks: "Baristanya ramah dan sabar menjelaskan jenis biji kopinya. Manual brew-nya wajib coba.",
-    bintang: 5,
-  },
-  {
-    nama: "Sarah Amelia",
-    teks: "Tempatnya estetik banget, cocok buat foto-foto. Harga masuk kantong mahasiswa.",
-    bintang: 5,
-  },
-];

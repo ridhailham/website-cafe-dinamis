@@ -5,7 +5,7 @@ import { WhatsAppIcon } from "./whatsapp-icon";
 
 export function Hero() {
   return (
-    <section className="relative flex min-h-[85vh] items-center justify-center overflow-hidden">
+    <section className="relative flex min-h-[calc(100dvh-4rem)] items-center justify-center overflow-hidden">
       <Image
         src={heroImage}
         alt="Suasana Kopi Senja"
@@ -49,7 +49,13 @@ export function Hero() {
         </div>
       </div>
 
-      <ChevronDown className="absolute bottom-6 left-1/2 z-10 h-6 w-6 -translate-x-1/2 animate-bounce text-white/70" />
+      <a
+        href="#menu"
+        aria-label="Lihat Menu"
+        className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 cursor-pointer text-white/70 transition-opacity hover:opacity-80"
+      >
+        <ChevronDown className="h-6 w-6 animate-bounce" />
+      </a>
     </section>
   );
 }

@@ -128,7 +128,6 @@ export function MenuForm({ item }: Props) {
           name="foto"
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          max={5 * 1024 * 1024}
           required={!sedangEdit}
           className="w-full rounded-lg border border-dashed border-stone-300 px-4 py-2.5 text-sm text-stone-600 file:mr-3 file:rounded-full file:border-0 file:bg-amber-50 file:px-4 file:py-1.5 file:text-xs file:font-semibold file:text-amber-700 hover:file:bg-amber-100"
         />

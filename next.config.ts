@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
     ],
     dangerouslyAllowLocalIP: true,
   },
+  devIndicators: false,
 };
 
 export default nextConfig;

@@ -98,7 +98,6 @@ async function simpanFoto(
   try {
     const blob = await put(`menu/${slug}-${uniqueId}.${ekstensi}`, file, {
       access: "public",
-      addRandomSuffix: true,
     });
     return blob.url;
   } catch (err) {
@@ -159,6 +158,8 @@ export async function updateItem(formData: FormData) {
     `/admin/edit/${id}`
   );
 
+  // Catatan: upload → update DB → delete lama. Jika crash setelah DB update
+  // tapi sebelum delete, foto lama orphan. Acceptable untuk scale project ini.
   await db
     .update(menuItems)
     .set({

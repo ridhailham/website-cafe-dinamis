@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { asc } from "drizzle-orm";
+import { asc, count, eq } from "drizzle-orm";
 import { Pencil, Plus } from "lucide-react";
 import { db } from "@/db";
 import { menuItems } from "@/db/schema";
@@ -10,11 +10,47 @@ export const metadata = {
   title: "Kelola Menu — Admin Kopi Senja",
 };
 
-export default async function AdminDashboard() {
+const PAGE_SIZE = 10;
+const TABS = [
+  { label: "Semua", href: "/admin" },
+  { label: "Minuman", href: "/admin?kategori=Minuman" },
+  { label: "Makanan", href: "/admin?kategori=Makanan" },
+] as const;
+
+function paginationHref(kategori: string | undefined, page: number) {
+  const params = new URLSearchParams();
+  if (kategori) params.set("kategori", kategori);
+  if (page > 1) params.set("page", String(page));
+  const qs = params.toString();
+  return `/admin${qs ? `?${qs}` : ""}`;
+}
+
+export default async function AdminDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ kategori?: string; page?: string }>;
+}) {
+  const { kategori: rawKat, page: rawPage } = await searchParams;
+  const kategori =
+    rawKat === "Minuman" || rawKat === "Makanan" ? rawKat : undefined;
+
+  const where = kategori ? eq(menuItems.kategori, kategori) : undefined;
+
+  const [{ total }] = await db
+    .select({ total: count() })
+    .from(menuItems)
+    .where(where);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const page = Math.max(1, Math.min(Number(rawPage) || 1, totalPages));
+
   const items = await db
     .select()
     .from(menuItems)
-    .orderBy(asc(menuItems.urutan), asc(menuItems.id));
+    .where(where)
+    .orderBy(asc(menuItems.urutan), asc(menuItems.id))
+    .limit(PAGE_SIZE)
+    .offset((page - 1) * PAGE_SIZE);
 
   return (
     <div>
@@ -22,7 +58,7 @@ export default async function AdminDashboard() {
         <div>
           <h1 className="text-xl font-bold text-stone-900">Kelola Menu</h1>
           <p className="mt-1 text-sm text-stone-500">
-            {items.length} item terdaftar. Perubahan langsung tampil di website.
+            {total} item terdaftar. Perubahan langsung tampil di website.
           </p>
         </div>
         <Link
@@ -32,6 +68,26 @@ export default async function AdminDashboard() {
           <Plus className="h-4 w-4" />
           Tambah Menu
         </Link>
+      </div>
+
+      <div className="mb-4 flex gap-2">
+        {TABS.map((tab) => {
+          const active =
+            tab.label === "Semua" ? !kategori : kategori === tab.label;
+          return (
+            <Link
+              key={tab.label}
+              href={tab.href}
+              className={`rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+                active
+                  ? "bg-amber-600 text-white"
+                  : "bg-white text-stone-600 border border-stone-200 hover:bg-stone-100"
+              }`}
+            >
+              {tab.label}
+            </Link>
+          );
+        })}
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm">
@@ -79,7 +135,10 @@ export default async function AdminDashboard() {
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-5 py-12 text-center text-stone-500">
+                <td
+                  colSpan={4}
+                  className="px-5 py-12 text-center text-stone-500"
+                >
                   Belum ada menu. Klik &ldquo;Tambah Menu&rdquo; untuk mulai.
                 </td>
               </tr>
@@ -87,6 +146,44 @@ export default async function AdminDashboard() {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-center gap-1 text-sm">
+          <Link
+            href={paginationHref(kategori, page - 1)}
+            className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
+              page <= 1
+                ? "pointer-events-none text-stone-300"
+                : "text-stone-600 hover:bg-stone-100"
+            }`}
+          >
+            &lsaquo; Prev
+          </Link>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+            <Link
+              key={p}
+              href={paginationHref(kategori, p)}
+              className={`min-w-[2rem] rounded-lg px-3 py-1.5 text-center font-medium transition-colors ${
+                p === page
+                  ? "bg-amber-600 text-white"
+                  : "text-stone-600 hover:bg-stone-100"
+              }`}
+            >
+              {p}
+            </Link>
+          ))}
+          <Link
+            href={paginationHref(kategori, page + 1)}
+            className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
+              page >= totalPages
+                ? "pointer-events-none text-stone-300"
+                : "text-stone-600 hover:bg-stone-100"
+            }`}
+          >
+            Next &rsaquo;
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

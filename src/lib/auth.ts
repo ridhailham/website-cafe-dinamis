@@ -5,9 +5,13 @@ const COOKIE_NAME = "kopi_session";
 const MAX_AGE = 60 * 60 * 24 * 7; // 7 hari
 
 function secretKey() {
-  return new TextEncoder().encode(
-    process.env.AUTH_SECRET ?? "dev-secret-ganti-sebelum-produksi"
-  );
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) {
+    throw new Error(
+      "AUTH_SECRET belum diset. Tambahkan di Vercel Environment Variables."
+    );
+  }
+  return new TextEncoder().encode(secret);
 }
 
 export async function createSession(email: string) {
