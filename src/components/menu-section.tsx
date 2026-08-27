@@ -70,17 +70,17 @@ export function MenuSection({ items }: Props) {
                   >
                     <div
                       ref={(el) => { if (el) scrollRefs.current[kat] = el; }}
-                      className="flex items-start gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden scrollbar-none"
+                      className="flex items-stretch gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden scrollbar-none"
                     >
                       {Array.from({ length: Math.ceil(katItems.length / 2) }, (_, col) => {
                         const item1 = katItems[col * 2];
                         const item2 = katItems[col * 2 + 1];
                         return (
-                          <div key={col} className="flex w-[14.5rem] shrink-0 snap-start flex-col gap-5">
+                          <div key={col} className="flex h-full w-[14.5rem] shrink-0 snap-start flex-col gap-5">
                             {[item1, item2].filter(Boolean).map((item) => (
                               <article
                                 key={item.id}
-                                className="flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                                className="flex h-full flex-1 flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition-shadow hover:shadow-md"
                               >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
