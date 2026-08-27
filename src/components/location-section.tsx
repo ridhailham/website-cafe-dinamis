@@ -8,17 +8,20 @@ type Props = {
   waUrl?: string;
   jamBuka?: JamBukaItem[];
   mapsEmbed?: string;
+  alamat?: string;
 };
 
 export function LocationSection({
   waUrl,
   jamBuka,
   mapsEmbed,
+  alamat,
 }: Props) {
   const waLink =
     waUrl || kedai.wa.url;
   const jam = jamBuka && jamBuka.length > 0 ? jamBuka : kedai.jamBuka;
   const peta = mapsEmbed || kedai.mapsEmbed;
+  const alamatAkhir = (alamat && alamat.trim()) || kedai.alamat;
 
   return (
     <section id="lokasi" className="scroll-mt-16 bg-white py-20">
@@ -37,7 +40,7 @@ export function LocationSection({
             <div>
               <div className="flex items-start gap-3">
                 <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
-                <p className="leading-relaxed text-stone-700">{kedai.alamat}</p>
+                <p className="leading-relaxed text-stone-700">{alamatAkhir}</p>
               </div>
 
               <div className="mt-6 flex items-start gap-3">

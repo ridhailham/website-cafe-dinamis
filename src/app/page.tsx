@@ -36,6 +36,7 @@ export default async function Home() {
   const jamBukaData =
     jam.length > 0 ? jam.map((j) => ({ hari: j.hari, jam: j.jam })) : undefined;
   const mapsEmbed = data?.mapsEmbed || undefined;
+  const alamat = (data?.alamat && data.alamat.trim()) || kedai.alamat;
 
   return (
     <>
@@ -48,6 +49,7 @@ export default async function Home() {
           waUrl={waUrl}
           jamBuka={jamBukaData}
           mapsEmbed={mapsEmbed}
+          alamat={alamat}
         />
       </main>
       <Footer waUrl={waUrl} />

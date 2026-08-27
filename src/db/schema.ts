@@ -37,6 +37,7 @@ export const bisnis = pgTable("bisnis", {
   waNomor: text("wa_nomor").notNull().default(""),
   waTeks: text("wa_teks").notNull().default(""),
   mapsEmbed: text("maps_embed").notNull().default(""),
+  alamat: text("alamat").notNull().default(""),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

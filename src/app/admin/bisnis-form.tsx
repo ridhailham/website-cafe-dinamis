@@ -94,6 +94,21 @@ export function BisnisForm({ bisnis, jamBuka = [] }: Props) {
       </div>
 
       <div>
+        <label htmlFor="alamat" className={labelClass}>
+          Alamat Detail
+        </label>
+        <textarea
+          id="alamat"
+          name="alamat"
+          rows={2}
+          maxLength={200}
+          defaultValue={bisnis?.alamat}
+          placeholder="cth. Jl. Raya Contoh No. 123, Dago, Bandung"
+          className={inputClass}
+        />
+      </div>
+
+      <div>
         <p className="mb-2 text-sm font-medium text-stone-700">Hari &amp; Jam Buka</p>
         <div className="space-y-2">
           {daftarJam.map((baris) => (

@@ -364,6 +364,7 @@ export async function updateBisnis(formData: FormData) {
     .replace(/\D/g, "");
   const waTeks = String(formData.get("waTeks") ?? "").trim().slice(0, 200);
   const mapsRaw = String(formData.get("mapsEmbed") ?? "").trim();
+  const alamat = String(formData.get("alamat") ?? "").trim().slice(0, 200);
 
   if (!waNomor) {
     redirect("/admin/bisnis?error=wa");
@@ -388,10 +389,10 @@ export async function updateBisnis(formData: FormData) {
   if (ada) {
     await db
       .update(bisnis)
-      .set({ waNomor, waTeks, mapsEmbed, updatedAt: new Date() })
+      .set({ waNomor, waTeks, mapsEmbed, alamat, updatedAt: new Date() })
       .where(eq(bisnis.id, ada.id));
   } else {
-    await db.insert(bisnis).values({ waNomor, waTeks, mapsEmbed });
+    await db.insert(bisnis).values({ waNomor, waTeks, mapsEmbed, alamat });
   }
 
   await db.delete(jamBuka);
