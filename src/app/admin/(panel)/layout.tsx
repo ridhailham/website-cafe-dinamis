@@ -41,7 +41,7 @@ export default async function PanelLayout({
               href="/admin/galeri"
               className="text-sm text-stone-600 hover:text-amber-700"
             >
-              Galeri
+              Kelola Galeri
             </Link>
           </div>
 
