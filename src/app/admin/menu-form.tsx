@@ -153,8 +153,8 @@ export function MenuForm({ item }: Props) {
           JPG/PNG/WebP, maksimal 5 MB. Foto harus rasio{" "}
           <span className="font-bold underline decoration-2 underline-offset-2">
             4:3
-          </span>
-          .
+          </span>{" "}
+          dan berorientasi lanskap agar tampil utuh.
         </p>
 
         {preview && (
