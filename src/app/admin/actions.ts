@@ -263,3 +263,72 @@ export async function hapusGaleri(formData: FormData) {
 
   redirect("/admin/galeri");
 }
+
+export async function ubahGaleri(formData: FormData) {
+  await assertAdmin();
+  const id = Number(formData.get("id"));
+  const alt = String(formData.get("alt") ?? "").trim().slice(0, 80);
+  const urutan = Math.round(Number(formData.get("urutan")) || 0);
+
+  if (!Number.isInteger(id)) {
+    redirect(`/admin/galeri/${formData.get("id")}/edit?error=validasi`);
+  }
+
+  const [lama] = await db
+    .select()
+    .from(galleryItems)
+    .where(eq(galleryItems.id, id))
+    .limit(1);
+  if (!lama) notFound();
+
+  const gambarUrl = await simpanFotoGaleri(formData, `/admin/galeri/${id}/edit`);
+
+  await db
+    .update(galleryItems)
+    .set({ alt, urutan, ...(gambarUrl && { gambarUrl }) })
+    .where(eq(galleryItems.id, id));
+
+  if (gambarUrl) await hapusFotoLama(lama.gambarUrl);
+
+  revalidatePath("/");
+  revalidatePath("/admin/galeri");
+  redirect("/admin/galeri");
+}
+
+export async function pindahGaleri(formData: FormData) {
+  await assertAdmin();
+  const id = Number(formData.get("id"));
+  const arah = String(formData.get("arah") ?? "");
+
+  if (!Number.isInteger(id) || (arah !== "naik" && arah !== "turun")) {
+    return;
+  }
+
+  const semua = await db
+    .select()
+    .from(galleryItems)
+    .orderBy(galleryItems.urutan, galleryItems.id);
+
+  const idx = semua.findIndex((g) => g.id === id);
+  const targetIdx = arah === "naik" ? idx - 1 : idx + 1;
+
+  if (idx === -1 || targetIdx < 0 || targetIdx >= semua.length) return;
+
+  const a = semua[idx];
+  const b = semua[targetIdx];
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(galleryItems)
+      .set({ urutan: b.urutan })
+      .where(eq(galleryItems.id, a.id));
+    await tx
+      .update(galleryItems)
+      .set({ urutan: a.urutan })
+      .where(eq(galleryItems.id, b.id));
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin/galeri");
+  redirect("/admin/galeri");
+}

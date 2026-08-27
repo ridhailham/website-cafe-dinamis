@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { asc } from "drizzle-orm";
-import { Plus } from "lucide-react";
+import { ArrowUp, ArrowDown, Pencil, Plus } from "lucide-react";
 import { db } from "@/db";
 import { galleryItems } from "@/db/schema";
 import { DeleteGalleryButton } from "../../delete-gallery-button";
+import { pindahGaleri } from "../../actions";
 
 export const metadata = {
   title: "Kelola Galeri — Admin Kopi Senja",
@@ -55,8 +56,39 @@ export default async function AdminGaleri() {
                   {item.alt || "(tanpa keterangan)"}
                 </p>
                 <p className="text-xs text-stone-400">Urutan: {item.urutan}</p>
-                <div className="pt-1">
-                  <DeleteGalleryButton id={item.id} />
+                <div className="flex items-center gap-1 pt-2">
+                  <form action={pindahGaleri}>
+                    <input type="hidden" name="id" value={item.id} />
+                    <input type="hidden" name="arah" value="naik" />
+                    <button
+                      type="submit"
+                      aria-label="Naikkan urutan"
+                      className="flex h-7 w-7 items-center justify-center rounded-md border border-stone-200 text-stone-500 transition-colors hover:bg-stone-50 hover:text-amber-700"
+                    >
+                      <ArrowUp className="h-3.5 w-3.5" />
+                    </button>
+                  </form>
+                  <form action={pindahGaleri}>
+                    <input type="hidden" name="id" value={item.id} />
+                    <input type="hidden" name="arah" value="turun" />
+                    <button
+                      type="submit"
+                      aria-label="Turunkan urutan"
+                      className="flex h-7 w-7 items-center justify-center rounded-md border border-stone-200 text-stone-500 transition-colors hover:bg-stone-50 hover:text-amber-700"
+                    >
+                      <ArrowDown className="h-3.5 w-3.5" />
+                    </button>
+                  </form>
+                  <Link
+                    href={`/admin/galeri/${item.id}/edit`}
+                    aria-label="Edit foto"
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-stone-200 text-stone-500 transition-colors hover:bg-stone-50 hover:text-amber-700"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Link>
+                  <div className="ml-auto">
+                    <DeleteGalleryButton id={item.id} />
+                  </div>
                 </div>
               </div>
             </div>
