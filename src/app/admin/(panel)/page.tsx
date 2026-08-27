@@ -3,7 +3,7 @@ import { asc } from "drizzle-orm";
 import { Pencil, Plus } from "lucide-react";
 import { db } from "@/db";
 import { menuItems } from "@/db/schema";
-import { deleteItem } from "../actions";
+import { DeleteButton } from "../delete-button";
 import { formatHarga } from "@/lib/constants";
 
 export const metadata = {
@@ -41,7 +41,6 @@ export default async function AdminDashboard() {
               <th className="px-5 py-3 font-semibold">Menu</th>
               <th className="px-5 py-3 font-semibold">Kategori</th>
               <th className="px-5 py-3 font-semibold">Harga</th>
-              <th className="px-5 py-3 font-semibold">Status</th>
               <th className="px-5 py-3 text-right font-semibold">Aksi</th>
             </tr>
           </thead>
@@ -65,17 +64,6 @@ export default async function AdminDashboard() {
                   {formatHarga(item.harga)}
                 </td>
                 <td className="px-5 py-3.5">
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      item.tersedia
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {item.tersedia ? "Tersedia" : "Sembunyi"}
-                  </span>
-                </td>
-                <td className="px-5 py-3.5">
                   <div className="flex items-center justify-end gap-2">
                     <a
                       href={`/admin/edit/${item.id}`}
@@ -84,22 +72,14 @@ export default async function AdminDashboard() {
                       <Pencil className="h-3.5 w-3.5" />
                       Edit
                     </a>
-                    <form action={deleteItem}>
-                      <input type="hidden" name="id" value={item.id} />
-                      <button
-                        type="submit"
-                        className="rounded-lg px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
-                      >
-                        Hapus
-                      </button>
-                    </form>
+                    <DeleteButton id={item.id} />
                   </div>
                 </td>
               </tr>
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-12 text-center text-stone-500">
+                <td colSpan={4} className="px-5 py-12 text-center text-stone-500">
                   Belum ada menu. Klik &ldquo;Tambah Menu&rdquo; untuk mulai.
                 </td>
               </tr>

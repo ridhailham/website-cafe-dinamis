@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { put, del } from "@vercel/blob";
 import { db } from "@/db";
@@ -55,7 +55,6 @@ function ambilData(formData: FormData) {
     deskripsi: String(formData.get("deskripsi") ?? "").trim(),
     harga: Math.round(Number(formData.get("harga"))),
     kategori: String(formData.get("kategori") ?? "Kopi"),
-    tersedia: formData.get("tersedia") === "on",
     urutan: Math.round(Number(formData.get("urutan")) || 0),
   };
 }
@@ -94,13 +93,18 @@ async function simpanFoto(
   const ekstensi =
     (file.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") ||
     "jpg";
+  const uniqueId = crypto.randomUUID().slice(0, 8);
 
-  const blob = await put(`menu/${slug}-${Date.now()}.${ekstensi}`, file, {
-    access: "public",
-    addRandomSuffix: true,
-  });
-
-  return blob.url;
+  try {
+    const blob = await put(`menu/${slug}-${uniqueId}.${ekstensi}`, file, {
+      access: "public",
+      addRandomSuffix: true,
+    });
+    return blob.url;
+  } catch (err) {
+    console.warn("[blob] Gagal meng-upload foto:", err);
+    redirect(`${tujuanForm}?error=upload`);
+  }
 }
 
 async function hapusFotoLama(gambarUrl: string | null) {
@@ -116,13 +120,16 @@ export async function createItem(formData: FormData) {
   await assertAdmin();
   const data = ambilData(formData);
 
-  if (!data.nama || !Number.isFinite(data.harga)) redirect("/admin/baru");
+  if (!data.nama || !Number.isFinite(data.harga)) {
+    redirect("/admin/baru?error=validasi");
+  }
 
   const gambarUrl = await simpanFoto(formData, data.nama, "/admin/baru");
+  if (!gambarUrl) redirect("/admin/baru?error=foto");
 
   await db.insert(menuItems).values({
     ...data,
-    ...(gambarUrl && { gambarUrl }),
+    gambarUrl,
   });
 
   segarkanCache();
@@ -135,7 +142,7 @@ export async function updateItem(formData: FormData) {
   const data = ambilData(formData);
 
   if (!Number.isInteger(id) || !data.nama || !Number.isFinite(data.harga)) {
-    redirect(`/admin/edit/${formData.get("id")}`);
+    redirect(`/admin/edit/${formData.get("id")}?error=validasi`);
   }
 
   const [lama] = await db
@@ -144,13 +151,13 @@ export async function updateItem(formData: FormData) {
     .where(eq(menuItems.id, id))
     .limit(1);
 
+  if (!lama) notFound();
+
   const gambarUrl = await simpanFoto(
     formData,
     data.nama,
     `/admin/edit/${id}`
   );
-
-  if (gambarUrl) await hapusFotoLama(lama?.gambarUrl ?? null);
 
   await db
     .update(menuItems)
@@ -160,6 +167,8 @@ export async function updateItem(formData: FormData) {
       ...(gambarUrl && { gambarUrl }),
     })
     .where(eq(menuItems.id, id));
+
+  if (gambarUrl) await hapusFotoLama(lama?.gambarUrl ?? null);
 
   segarkanCache();
   redirect("/admin");
@@ -176,8 +185,8 @@ export async function deleteItem(formData: FormData) {
       .where(eq(menuItems.id, id))
       .limit(1);
 
-    await hapusFotoLama(item?.gambarUrl ?? null);
     await db.delete(menuItems).where(eq(menuItems.id, id));
+    await hapusFotoLama(item?.gambarUrl ?? null);
     segarkanCache();
   }
 

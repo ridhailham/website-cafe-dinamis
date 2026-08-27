@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { asc } from "drizzle-orm";
 import { db } from "@/db";
 import { menuItems } from "@/db/schema";
 import { Navbar } from "@/components/navbar";
@@ -16,7 +16,6 @@ export default async function Home() {
   const items = await db
     .select()
     .from(menuItems)
-    .where(eq(menuItems.tersedia, true))
     .orderBy(asc(menuItems.urutan), asc(menuItems.id));
 
   return (

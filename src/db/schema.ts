@@ -1,5 +1,4 @@
 import {
-  boolean,
   integer,
   pgTable,
   serial,
@@ -13,7 +12,6 @@ export const menuItems = pgTable("menu_items", {
   deskripsi: text("deskripsi").notNull().default(""),
   harga: integer("harga").notNull(),
   kategori: text("kategori").notNull().default("Kopi"),
-  tersedia: boolean("tersedia").notNull().default(true),
   urutan: integer("urutan").notNull().default(0),
   gambarUrl: text("gambar_url"),
   createdAt: timestamp("created_at", { withTimezone: true })

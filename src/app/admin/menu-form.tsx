@@ -16,6 +16,9 @@ export function PesanError({ kode }: { kode?: string }) {
     ukuran: "Ukuran foto maksimal 5 MB.",
     token:
       "Fitur foto belum aktif karena penyimpanan Vercel Blob belum terhubung. Menu tetap tersimpan tanpa foto — foto akan bisa diunggah setelah website di-deploy.",
+    validasi: "Nama dan harga wajib diisi dengan benar.",
+    foto: "Menu baru wajib memiliki foto.",
+    upload: "Gagal meng-upload foto. Periksa koneksi dan coba lagi.",
   };
 
   return (
@@ -58,7 +61,7 @@ export function MenuForm({ item }: Props) {
           <select
             id="kategori"
             name="kategori"
-            defaultValue={item?.kategori ?? "Kopi"}
+            defaultValue={item?.kategori ?? "Minuman"}
             className={inputClass}
           >
             {KATEGORI_OPTIONS.map((k) => (
@@ -118,13 +121,15 @@ export function MenuForm({ item }: Props) {
 
       <div>
         <label htmlFor="foto" className={labelClass}>
-          Foto Menu
+          Foto Menu {!sedangEdit && "*"}
         </label>
         <input
           id="foto"
           name="foto"
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
+          max={5 * 1024 * 1024}
+          required={!sedangEdit}
           className="w-full rounded-lg border border-dashed border-stone-300 px-4 py-2.5 text-sm text-stone-600 file:mr-3 file:rounded-full file:border-0 file:bg-amber-50 file:px-4 file:py-1.5 file:text-xs file:font-semibold file:text-amber-700 hover:file:bg-amber-100"
         />
         <p className="mt-1 text-xs text-stone-400">
@@ -147,17 +152,7 @@ export function MenuForm({ item }: Props) {
         )}
       </div>
 
-      <div className="flex items-center justify-between border-t border-stone-100 pt-5">
-        <label className="flex items-center gap-2 text-sm text-stone-700">
-          <input
-            type="checkbox"
-            name="tersedia"
-            defaultChecked={item ? item.tersedia : true}
-            className="h-4 w-4 accent-amber-600"
-          />
-          Tampilkan di website
-        </label>
-
+      <div className="flex items-center justify-end border-t border-stone-100 pt-5">
         <button
           type="submit"
           className="rounded-full bg-amber-600 px-8 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
