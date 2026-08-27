@@ -1,3 +1,6 @@
+"use client";
+
+import { useRef, useState } from "react";
 import { createItem, updateItem } from "./actions";
 import { type MenuItem } from "@/db/schema";
 import { KATEGORI_OPTIONS } from "@/lib/constants";
@@ -30,6 +33,19 @@ export function PesanError({ kode }: { kode?: string }) {
 
 export function MenuForm({ item }: Props) {
   const sedangEdit = Boolean(item);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFoto = () => {
+    const file = fileRef.current?.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setPreview((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return url;
+      });
+    }
+  };
 
   return (
     <form
@@ -126,16 +142,35 @@ export function MenuForm({ item }: Props) {
         <input
           id="foto"
           name="foto"
+          ref={fileRef}
           type="file"
           accept="image/jpeg,image/png,image/webp"
           required={!sedangEdit}
+          onChange={handleFoto}
           className="w-full rounded-lg border border-dashed border-stone-300 px-4 py-2.5 text-sm text-stone-600 file:mr-3 file:rounded-full file:border-0 file:bg-amber-50 file:px-4 file:py-1.5 file:text-xs file:font-semibold file:text-amber-700 hover:file:bg-amber-100"
         />
         <p className="mt-1 text-xs text-stone-400">
-          JPG/PNG/WebP, maksimal 5 MB.
+          JPG/PNG/WebP, maksimal 5 MB. Foto tampil dengan rasio 4:3.
         </p>
 
-        {item?.gambarUrl && (
+        {preview && (
+          <div className="mt-3">
+            <div className="overflow-hidden rounded-xl border border-stone-200">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={preview}
+                alt="Pratinjau foto yang dipilih"
+                className="aspect-[4/3] w-full object-cover"
+              />
+            </div>
+            <p className="mt-1 text-xs text-stone-400">
+              Pratinjau ini menampilkan tampilan akhir (dipotong rata ke 4:3).
+              Pilih foto berorientasi lanskap agar tidak ada bagian yang terpotong.
+            </p>
+          </div>
+        )}
+
+        {!preview && item?.gambarUrl && (
           <div className="mt-3">
             <div className="overflow-hidden rounded-xl border border-stone-200">
               {/* eslint-disable-next-line @next/next/no-img-element */}
