@@ -92,7 +92,7 @@ export function MenuSection({ items }: Props) {
                                   src={item.gambarUrl || "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=600&h=450&fit=crop"}
                                   alt={`Foto ${item.nama}`}
                                   loading="lazy"
-                                  className="aspect-[3/2] w-full shrink-0 object-cover"
+                                  className="aspect-[4/3] w-full shrink-0 object-cover"
                                 />
                                 <div className="flex flex-1 flex-col p-5">
                                   <span

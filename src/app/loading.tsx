@@ -47,7 +47,7 @@ export default function Loading() {
                   key={i}
                   className="overflow-hidden rounded-2xl border border-stone-200 bg-white p-0 shadow-sm"
                 >
-                  <Skeleton className="aspect-[3/2] w-full rounded-none" />
+                  <Skeleton className="aspect-[4/3] w-full rounded-none" />
                   <div className="space-y-3 p-5">
                     <Skeleton className="h-4 w-20 rounded-full" />
                     <Skeleton className="h-6 w-3/4" />
