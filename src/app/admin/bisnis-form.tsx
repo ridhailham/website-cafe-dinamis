@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { updateBisnis } from "./actions";
 import type { Bisnis, JamBuka } from "@/db/schema";
@@ -14,18 +14,21 @@ const labelClass = "mb-1 block text-sm font-medium text-stone-700";
 const inputClass =
   "w-full rounded-lg border border-stone-300 px-4 py-2.5 text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-600/20";
 
-let idBaris = 0;
-
 export function BisnisForm({ bisnis, jamBuka = [] }: Props) {
-  const [daftarJam, setDaftarJam] = useState<{ id: number; hari: string; jam: string }[]>(
-    () =>
-      jamBuka.length > 0
-        ? jamBuka.map((j) => ({ id: idBaris++, hari: j.hari, jam: j.jam }))
-        : [{ id: idBaris++, hari: "", jam: "" }]
+  const nextId = useRef(1000000);
+  const [daftarJam, setDaftarJam] = useState<
+    { id: number; hari: string; jam: string }[]
+  >(() =>
+    jamBuka.length > 0
+      ? jamBuka.map((j) => ({ id: j.id, hari: j.hari, jam: j.jam }))
+      : [{ id: -1, hari: "", jam: "" }]
   );
 
   const tambahJam = () =>
-    setDaftarJam((prev) => [...prev, { id: idBaris++, hari: "", jam: "" }]);
+    setDaftarJam((prev) => [
+      ...prev,
+      { id: nextId.current++, hari: "", jam: "" },
+    ]);
   const hapusJam = (id: number) =>
     setDaftarJam((prev) => prev.filter((r) => r.id !== id));
 
@@ -83,8 +86,10 @@ export function BisnisForm({ bisnis, jamBuka = [] }: Props) {
           className={inputClass}
         />
         <p className="mt-1 text-xs text-stone-400">
-          Tempel link embed (berisi /maps/embed?pb=...). Kosongkan untuk
-          menyembunyikan peta.
+          Tempel link Google Maps — bisa link embed (&ldquo;Bagikan &rarr;
+          Sematkan peta&rdquo;, berisi /maps/embed?pb=...) atau cukup tempel link
+          peta biasa / link Bagikan (maps.app.goo.gl). Akan otomatis dikonversi
+          ke peta yang tampil. Kosongkan untuk menyembunyikan peta.
         </p>
       </div>
 

@@ -23,6 +23,7 @@ export function PesanError({ kode }: { kode?: string }) {
     validasi: "Nama dan harga wajib diisi dengan benar.",
     foto: "Menu baru wajib memiliki foto.",
     upload: "Gagal meng-upload foto. Periksa koneksi dan coba lagi.",
+    maps: "Link peta tidak valid. Tempel link Google Maps biasa atau link 'Bagikan' (maps.app.goo.gl) — akan dikonversi otomatis.",
   };
 
   return (

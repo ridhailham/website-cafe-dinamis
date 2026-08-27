@@ -11,9 +11,9 @@ export const metadata = {
 export default async function KelolaBisnisPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; berhasil?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, berhasil } = await searchParams;
 
   const [data] = await db.select().from(bisnis).limit(1);
   const jam = await db.select().from(jamBuka).orderBy(asc(jamBuka.urutan));
@@ -27,6 +27,12 @@ export default async function KelolaBisnisPage({
           website. Perubahan langsung tampil di halaman depan.
         </p>
       </div>
+
+      {berhasil === "1" && (
+        <p className="mb-5 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
+          Data bisnis berhasil disimpan.
+        </p>
+      )}
 
       <PesanError kode={error} />
       <BisnisForm bisnis={data} jamBuka={jam} />
