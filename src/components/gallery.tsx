@@ -21,7 +21,7 @@ export function Gallery({ items }: Props) {
             items.map((foto) => (
               <div
                 key={foto.id}
-                className="group relative aspect-square overflow-hidden rounded-2xl"
+                className="group relative aspect-[4/3] overflow-hidden rounded-2xl"
               >
                 <Image
                   src={foto.gambarUrl}
