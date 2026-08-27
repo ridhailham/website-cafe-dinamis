@@ -137,12 +137,14 @@ export function MenuForm({ item }: Props) {
 
         {item?.gambarUrl && (
           <div className="mt-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={item.gambarUrl}
-              alt={`Foto ${item.nama}`}
-              className="h-32 w-full max-w-[240px] rounded-lg border border-stone-200 object-cover"
-            />
+            <div className="overflow-hidden rounded-xl border border-stone-200">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.gambarUrl}
+                alt={`Foto ${item.nama}`}
+                className="aspect-[4/3] w-full object-cover"
+              />
+            </div>
             <p className="mt-1 text-xs text-stone-400">
               Foto saat ini. Biarkan kolom di atas kosong bila tidak ingin
               mengganti.
