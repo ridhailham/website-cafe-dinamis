@@ -68,10 +68,11 @@ const DATA_GALERI = [
 ];
 
 async function main() {
-  const [{ db }, { galleryItems, menuItems }] = await Promise.all([
-    import("./index"),
-    import("./schema"),
-  ]);
+  const [{ db }, { bisnis, galleryItems, jamBuka, menuItems }] =
+    await Promise.all([
+      import("./index"),
+      import("./schema"),
+    ]);
 
   const existing = await db.select().from(menuItems);
 
@@ -92,6 +93,28 @@ async function main() {
       .insert(galleryItems)
       .values(DATA_GALERI.map((g, i) => ({ ...g, urutan: i + 1 })));
     console.log(`Berhasil mengisi ${DATA_GALERI.length} foto galeri awal.`);
+  }
+
+  const [bisnisAda] = await db.select().from(bisnis).limit(1);
+  if (bisnisAda) {
+    console.log("Data bisnis sudah ada — seed bisnis dilewati.");
+  } else {
+    await db.insert(bisnis).values({
+      waNomor: "6281234567890",
+      waTeks: "Halo Kopi Senja! Saya mau tanya-tanya dulu.",
+    });
+    console.log("Berhasil mengisi data bisnis awal.");
+  }
+
+  const jamAda = await db.select().from(jamBuka).limit(1);
+  if (jamAda.length > 0) {
+    console.log("Jam buka sudah ada — seed jam buka dilewati.");
+  } else {
+    await db.insert(jamBuka).values([
+      { hari: "Senin – Jumat", jam: "08.00 – 22.00", urutan: 0 },
+      { hari: "Sabtu – Minggu", jam: "07.00 – 23.00", urutan: 1 },
+    ]);
+    console.log("Berhasil mengisi jam buka awal.");
   }
 }
 

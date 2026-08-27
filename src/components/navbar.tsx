@@ -11,7 +11,7 @@ const links = [
   { href: "#lokasi", label: "Lokasi" },
 ];
 
-export function Navbar() {
+export function Navbar({ waUrl }: { waUrl?: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -36,7 +36,7 @@ export function Navbar() {
 
         <div className="flex items-center gap-2">
           <a
-            href={kedai.wa.url}
+            href={waUrl || kedai.wa.url}
             target="_blank"
             rel="noopener noreferrer"
             className="hidden items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-700 sm:inline-flex"

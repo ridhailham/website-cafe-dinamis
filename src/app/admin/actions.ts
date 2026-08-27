@@ -6,7 +6,7 @@ import { notFound, redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { put, del } from "@vercel/blob";
 import { db } from "@/db";
-import { galleryItems, menuItems } from "@/db/schema";
+import { bisnis, galleryItems, jamBuka, menuItems } from "@/db/schema";
 import { createSession, destroySession, verifySessionFromToken } from "@/lib/auth";
 
 const COOKIE_NAME = "kopi_session";
@@ -293,4 +293,50 @@ export async function ubahGaleri(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/admin/galeri");
   redirect("/admin/galeri");
+}
+
+export async function updateBisnis(formData: FormData) {
+  await assertAdmin();
+
+  const waNomor = String(formData.get("waNomor") ?? "")
+    .trim()
+    .replace(/\D/g, "");
+  const waTeks = String(formData.get("waTeks") ?? "").trim().slice(0, 200);
+  const mapsEmbed = String(formData.get("mapsEmbed") ?? "").trim();
+
+  if (!waNomor) {
+    redirect("/admin/bisnis?error=wa");
+  }
+
+  const hariArr = formData.getAll("jam_hari");
+  const jamArr = formData.getAll("jam_jam");
+  const jamList: { hari: string; jam: string }[] = hariArr
+    .map((_, i) => ({
+      hari: String(hariArr[i] ?? "").trim().slice(0, 40),
+      jam: String(jamArr[i] ?? "").trim().slice(0, 40),
+    }))
+    .filter((j) => j.hari || j.jam);
+
+  const [ada] = await db.select().from(bisnis).limit(1);
+
+  if (ada) {
+    await db
+      .update(bisnis)
+      .set({ waNomor, waTeks, mapsEmbed, updatedAt: new Date() })
+      .where(eq(bisnis.id, ada.id));
+  } else {
+    await db.insert(bisnis).values({ waNomor, waTeks, mapsEmbed });
+  }
+
+  await db.delete(jamBuka);
+
+  if (jamList.length > 0) {
+    await db
+      .insert(jamBuka)
+      .values(jamList.map((j, i) => ({ ...j, urutan: i })));
+  }
+
+  revalidatePath("/");
+  revalidatePath("/admin/bisnis");
+  redirect("/admin/bisnis");
 }

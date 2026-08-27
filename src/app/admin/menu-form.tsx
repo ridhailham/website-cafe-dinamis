@@ -17,6 +17,7 @@ export function PesanError({ kode }: { kode?: string }) {
   const pesan: Record<string, string> = {
     tipe: "File harus berupa gambar (JPG, PNG, atau WebP).",
     ukuran: "Ukuran foto maksimal 5 MB.",
+    wa: "Nomor WhatsApp wajib diisi dengan benar.",
     token:
       "Fitur foto belum aktif karena penyimpanan Vercel Blob belum terhubung. Menu tetap tersimpan tanpa foto — foto akan bisa diunggah setelah website di-deploy.",
     validasi: "Nama dan harga wajib diisi dengan benar.",

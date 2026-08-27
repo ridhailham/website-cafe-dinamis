@@ -2,7 +2,24 @@ import { Clock, MapPin } from "lucide-react";
 import { kedai } from "@/data/kedai";
 import { WhatsAppIcon } from "./whatsapp-icon";
 
-export function LocationSection() {
+type JamBukaItem = { hari: string; jam: string };
+
+type Props = {
+  waUrl?: string;
+  jamBuka?: JamBukaItem[];
+  mapsEmbed?: string;
+};
+
+export function LocationSection({
+  waUrl,
+  jamBuka,
+  mapsEmbed,
+}: Props) {
+  const waLink =
+    waUrl || kedai.wa.url;
+  const jam = jamBuka && jamBuka.length > 0 ? jamBuka : kedai.jamBuka;
+  const peta = mapsEmbed || kedai.mapsEmbed;
+
   return (
     <section id="lokasi" className="scroll-mt-16 bg-white py-20">
       <div className="mx-auto max-w-6xl px-4">
@@ -26,9 +43,9 @@ export function LocationSection() {
               <div className="mt-6 flex items-start gap-3">
                 <Clock className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
                 <dl className="w-full space-y-2">
-                  {kedai.jamBuka.map((j) => (
+                  {jam.map((j, i) => (
                     <div
-                      key={j.hari}
+                      key={`${j.hari}-${i}`}
                       className="flex items-center justify-between border-b border-dashed border-stone-200 pb-2 text-stone-700"
                     >
                       <dt className="font-medium">{j.hari}</dt>
@@ -40,7 +57,7 @@ export function LocationSection() {
             </div>
 
             <a
-              href={kedai.wa.url}
+              href={waLink}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex w-fit items-center gap-2 rounded-full bg-green-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-green-700"
@@ -50,14 +67,16 @@ export function LocationSection() {
             </a>
           </div>
 
-          <iframe
-            src={kedai.mapsEmbed}
-            title={`Peta lokasi ${kedai.nama}`}
-            loading="lazy"
-            allowFullScreen
-            referrerPolicy="no-referrer-when-downgrade"
-            className="h-72 w-full rounded-2xl border-0 md:h-auto md:min-h-80"
-          />
+          {peta && (
+            <iframe
+              src={peta}
+              title={`Peta lokasi ${kedai.nama}`}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+              className="h-72 w-full rounded-2xl border-0 md:h-auto md:min-h-80"
+            />
+          )}
         </div>
       </div>
     </section>

@@ -43,6 +43,12 @@ export default async function PanelLayout({
             >
               Kelola Galeri
             </Link>
+            <Link
+              href="/admin/bisnis"
+              className="text-sm text-stone-600 hover:text-amber-700"
+            >
+              Kelola Bisnis
+            </Link>
           </div>
 
           <div className="flex items-center gap-3">

@@ -2,7 +2,7 @@ import { kedai } from "@/data/kedai";
 import { WhatsAppIcon } from "./whatsapp-icon";
 import { InstagramIcon } from "./instagram-icon";
 
-export function Footer() {
+export function Footer({ waUrl }: { waUrl?: string }) {
   return (
     <footer className="bg-stone-900 py-12 text-stone-300">
       <div className="mx-auto max-w-6xl px-4">
@@ -16,7 +16,7 @@ export function Footer() {
 
           <div className="flex items-center gap-4">
             <a
-              href={kedai.wa.url}
+              href={waUrl || kedai.wa.url}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"

@@ -3,7 +3,7 @@ import { ChevronDown } from "lucide-react";
 import { heroImage, kedai } from "@/data/kedai";
 import { WhatsAppIcon } from "./whatsapp-icon";
 
-export function Hero() {
+export function Hero({ waUrl }: { waUrl?: string }) {
   return (
     <section className="relative flex min-h-[calc(100dvh-4rem)] items-center justify-center overflow-hidden">
       <Image
@@ -38,7 +38,7 @@ export function Hero() {
             Lihat Menu
           </a>
           <a
-            href={kedai.wa.url}
+            href={waUrl || kedai.wa.url}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-8 py-3 text-sm font-semibold text-white backdrop-blur transition-colors hover:bg-white/20 sm:w-auto"
