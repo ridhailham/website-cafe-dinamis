@@ -154,7 +154,7 @@ export function MenuForm({ item }: Props) {
           <span className="font-bold underline decoration-2 underline-offset-2">
             4:3
           </span>{" "}
-          dan berorientasi lanskap agar tampil utuh.
+          dan berorientasi lanskap agar tampilan foto utuh.
         </p>
 
         {preview && (
