@@ -50,6 +50,35 @@ export const jamBuka = pgTable("jam_buka", {
   urutan: integer("urutan").notNull().default(0),
 });
 
+export const adminCredentials = pgTable("admin_credentials", {
+  id: serial("id").primaryKey(),
+  passwordHash: text("password_hash").notNull(),
+  resetKeyHash: text("reset_key_hash").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const sessions = pgTable("sessions", {
+  id: text("id").primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  lastUsedAt: timestamp("last_used_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const loginAttempts = pgTable("login_attempts", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull(),
+  ip: text("ip").notNull().default(""),
+  failedAt: timestamp("failed_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type MenuItem = typeof menuItems.$inferSelect;
 export type NewMenuItem = typeof menuItems.$inferInsert;
 export type GalleryItem = typeof galleryItems.$inferSelect;
@@ -58,3 +87,6 @@ export type Bisnis = typeof bisnis.$inferSelect;
 export type NewBisnis = typeof bisnis.$inferInsert;
 export type JamBuka = typeof jamBuka.$inferSelect;
 export type NewJamBuka = typeof jamBuka.$inferInsert;
+export type AdminCredential = typeof adminCredentials.$inferSelect;
+export type Session = typeof sessions.$inferSelect;
+export type LoginAttempt = typeof loginAttempts.$inferSelect;

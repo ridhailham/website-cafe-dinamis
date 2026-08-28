@@ -4,9 +4,11 @@ import { jwtVerify } from "jose";
 const COOKIE_NAME = "kopi_session";
 
 function secretKey() {
-  return new TextEncoder().encode(
-    process.env.AUTH_SECRET ?? "dev-secret-ganti-sebelum-produksi"
-  );
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) {
+    throw new Error("AUTH_SECRET belum diset di environment.");
+  }
+  return new TextEncoder().encode(secret);
 }
 
 export async function proxy(req: NextRequest) {

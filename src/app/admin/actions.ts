@@ -1,18 +1,69 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { eq, and, gt } from "drizzle-orm";
 import { put, del } from "@vercel/blob";
 import { db } from "@/db";
-import { bisnis, galleryItems, jamBuka, menuItems } from "@/db/schema";
-import { createSession, destroySession, verifySessionFromToken } from "@/lib/auth";
+import {
+  adminCredentials,
+  bisnis,
+  galleryItems,
+  jamBuka,
+  loginAttempts,
+  menuItems,
+  sessions,
+} from "@/db/schema";
+import {
+  createSession,
+  destroySession,
+  getActiveSession,
+  hashSecret,
+  verifikasiSecret,
+  revokeAllSessionsExceptCurrent,
+} from "@/lib/auth";
 
-const COOKIE_NAME = "kopi_session";
 const MAX_FOTO_BYTES = 5 * 1024 * 1024;
 
 export type LoginState = { error?: string };
+
+async function getClientIp(): Promise<string> {
+  const h = await headers();
+  const fwd = h.get("x-forwarded-for");
+  if (fwd) return fwd.split(",")[0].trim();
+  const realIp = h.get("x-real-ip");
+  return realIp ?? "unknown";
+}
+
+// Rate limit: maks 5 percobaan gagal per 15 menit per email+IP.
+const MAX_ATTEMPTS = 5;
+const WINDOW_MS = 15 * 60 * 1000;
+
+async function blokirRateLimit(email: string, ip: string): Promise<boolean> {
+  const sejak = new Date(Date.now() - WINDOW_MS);
+  const count = await db
+    .select()
+    .from(loginAttempts)
+    .where(
+      and(
+        eq(loginAttempts.email, email),
+        eq(loginAttempts.ip, ip),
+        gt(loginAttempts.failedAt, sejak)
+      )
+    );
+  return count.length >= MAX_ATTEMPTS;
+}
+
+async function catatPercobaanGagal(email: string, ip: string) {
+  await db.insert(loginAttempts).values({ email, ip });
+}
+
+async function bersihkanPercobaan(email: string, ip: string) {
+  await db
+    .delete(loginAttempts)
+    .where(and(eq(loginAttempts.email, email), eq(loginAttempts.ip, ip)));
+}
 
 export async function loginAction(
   _prev: LoginState,
@@ -20,19 +71,34 @@ export async function loginAction(
 ): Promise<LoginState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const ip = await getClientIp();
 
   if (!email || !password) {
     return { error: "Email dan password wajib diisi." };
   }
 
-  if (
-    email !== process.env.ADMIN_EMAIL ||
-    password !== process.env.ADMIN_PASSWORD
-  ) {
+  if (await blokirRateLimit(email, ip)) {
+    return {
+      error:
+        "Terlalu banyak percobaan gagal. Silakan coba lagi dalam 15 menit.",
+    };
+  }
+
+  const creds = await db.select().from(adminCredentials).limit(1);
+  const cred = creds[0];
+
+  const emailBenar = email === process.env.ADMIN_EMAIL;
+  const passwordBenar = cred
+    ? await verifikasiSecret(password, cred.passwordHash)
+    : false;
+
+  if (!emailBenar || !passwordBenar) {
+    await catatPercobaanGagal(email, ip);
     return { error: "Email atau password salah." };
   }
 
-  await createSession(email);
+  await bersihkanPercobaan(email, ip);
+  await createSession();
   redirect("/admin");
 }
 
@@ -42,11 +108,133 @@ export async function logoutAction() {
 }
 
 async function assertAdmin() {
-  const store = await cookies();
-  const session = await verifySessionFromToken(
-    store.get(COOKIE_NAME)?.value
-  );
-  if (!session) redirect("/admin/login");
+  const ok = await getActiveSession();
+  if (!ok) redirect("/admin/login");
+}
+
+export type ResetState = { error?: string; ok?: boolean; key?: string };
+
+export async function resetViaRecoveryAction(
+  _prev: ResetState,
+  formData: FormData
+): Promise<ResetState> {
+  const recoveryKey = String(formData.get("recoveryKey") ?? "").trim();
+  const passwordBaru = String(formData.get("password") ?? "");
+  const konfirmasi = String(formData.get("konfirmasi") ?? "");
+
+  if (!recoveryKey || !passwordBaru || !konfirmasi) {
+    return { error: "Semua kolom wajib diisi." };
+  }
+  if (passwordBaru.length < 8) {
+    return { error: "Password baru minimal 8 karakter." };
+  }
+  if (passwordBaru !== konfirmasi) {
+    return { error: "Konfirmasi password tidak cocok." };
+  }
+
+  const creds = await db.select().from(adminCredentials).limit(1);
+  const cred = creds[0];
+  if (!cred) {
+    return { error: "Akun admin belum diinisialisasi." };
+  }
+
+  const cocok = await verifikasiSecret(recoveryKey, cred.resetKeyHash);
+  if (!cocok) {
+    return { error: "Recovery key salah." };
+  }
+
+  const passwordHash = await hashSecret(passwordBaru);
+  const resetKeyBaru = crypto.randomUUID().replace(/-/g, "").slice(0, 24);
+  const resetKeyHashBaru = await hashSecret(resetKeyBaru);
+
+  await db
+    .update(adminCredentials)
+    .set({
+      passwordHash,
+      resetKeyHash: resetKeyHashBaru,
+      updatedAt: new Date(),
+    })
+    .where(eq(adminCredentials.id, cred.id));
+
+  // Recovery key lama sudah terpakai — cabut semua session lama.
+  await db.delete(sessions);
+
+  return { ok: true, key: resetKeyBaru };
+}
+
+export type SandiState = { error?: string; ok?: boolean };
+
+export async function ubahSandiAction(
+  _prev: SandiState,
+  formData: FormData
+): Promise<SandiState> {
+  await assertAdmin();
+
+  const sandiLama = String(formData.get("sandiLama") ?? "");
+  const sandiBaru = String(formData.get("sandiBaru") ?? "");
+  const konfirmasi = String(formData.get("konfirmasi") ?? "");
+
+  if (!sandiLama || !sandiBaru || !konfirmasi) {
+    return { error: "Semua kolom wajib diisi." };
+  }
+  if (sandiBaru.length < 8) {
+    return { error: "Password baru minimal 8 karakter." };
+  }
+  if (sandiBaru !== konfirmasi) {
+    return { error: "Konfirmasi password tidak cocok." };
+  }
+
+  const creds = await db.select().from(adminCredentials).limit(1);
+  const cred = creds[0];
+  if (!cred) {
+    return { error: "Akun admin belum diinisialisasi." };
+  }
+
+  const cocok = await verifikasiSecret(sandiLama, cred.passwordHash);
+  if (!cocok) {
+    return { error: "Password lama salah." };
+  }
+
+  const passwordHash = await hashSecret(sandiBaru);
+  await db
+    .update(adminCredentials)
+    .set({ passwordHash, updatedAt: new Date() })
+    .where(eq(adminCredentials.id, cred.id));
+
+  return { ok: true };
+}
+
+export type RecoveryState = { error?: string; key?: string };
+
+export async function regenerateRecoveryAction(
+  _prev: RecoveryState,
+  _formData: FormData
+): Promise<RecoveryState> {
+  void _prev;
+  void _formData;
+  await assertAdmin();
+
+  const creds = await db.select().from(adminCredentials).limit(1);
+  const cred = creds[0];
+  if (!cred) {
+    return { error: "Akun admin belum diinisialisasi." };
+  }
+
+  const resetKeyBaru = crypto.randomUUID().replace(/-/g, "").slice(0, 24);
+  const resetKeyHashBaru = await hashSecret(resetKeyBaru);
+
+  await db
+    .update(adminCredentials)
+    .set({ resetKeyHash: resetKeyHashBaru, updatedAt: new Date() })
+    .where(eq(adminCredentials.id, cred.id));
+
+  return { key: resetKeyBaru };
+}
+
+export async function logoutSemuaPerangkatAction() {
+  await assertAdmin();
+  await revokeAllSessionsExceptCurrent();
+  redirect("/admin/pengaturan");
 }
 
 function ambilData(formData: FormData) {

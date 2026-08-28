@@ -1,24 +1,18 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import {
   logoutAction,
 } from "../actions";
-import { verifySessionFromToken } from "@/lib/auth";
-
-const COOKIE_NAME = "kopi_session";
+import { getActiveSession } from "@/lib/auth";
 
 export default async function PanelLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const store = await cookies();
-  const session = await verifySessionFromToken(
-    store.get(COOKIE_NAME)?.value
-  );
-  if (!session) redirect("/admin/login");
+  const active = await getActiveSession();
+  if (!active) redirect("/admin/login");
 
   return (
     <div className="min-h-screen bg-stone-100">
@@ -48,6 +42,12 @@ export default async function PanelLayout({
               className="text-sm text-stone-600 hover:text-amber-700"
             >
               Kelola Bisnis
+            </Link>
+            <Link
+              href="/admin/pengaturan"
+              className="text-sm text-stone-600 hover:text-amber-700"
+            >
+              Pengaturan
             </Link>
           </div>
 
