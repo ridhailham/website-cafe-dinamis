@@ -23,6 +23,7 @@ import {
   verifikasiSecret,
   revokeAllSessionsExceptCurrent,
 } from "@/lib/auth";
+import { KATEGORI_OPTIONS, type Kategori } from "@/lib/constants";
 
 const MAX_FOTO_BYTES = 5 * 1024 * 1024;
 
@@ -281,11 +282,16 @@ export async function logoutSemuaPerangkatAction() {
 }
 
 function ambilData(formData: FormData) {
+  const kategoriRaw = String(formData.get("kategori") ?? "Minuman").trim();
+  const kategori: Kategori = KATEGORI_OPTIONS.includes(kategoriRaw as Kategori)
+    ? (kategoriRaw as Kategori)
+    : "Minuman";
+
   return {
-    nama: String(formData.get("nama") ?? "").trim(),
-    deskripsi: String(formData.get("deskripsi") ?? "").trim(),
+    nama: String(formData.get("nama") ?? "").trim().slice(0, 80),
+    deskripsi: String(formData.get("deskripsi") ?? "").trim().slice(0, 160),
     harga: Math.round(Number(formData.get("harga"))),
-    kategori: String(formData.get("kategori") ?? "Kopi"),
+    kategori,
     urutan: Math.round(Number(formData.get("urutan")) || 0),
   };
 }
@@ -350,7 +356,12 @@ export async function createItem(formData: FormData) {
   await assertAdmin();
   const data = ambilData(formData);
 
-  if (!data.nama || !Number.isFinite(data.harga)) {
+  if (
+    !data.nama ||
+    !Number.isFinite(data.harga) ||
+    data.harga < 0 ||
+    data.harga > 100_000_000
+  ) {
     redirect("/admin/baru?error=validasi");
   }
 
@@ -371,7 +382,13 @@ export async function updateItem(formData: FormData) {
   const id = Number(formData.get("id"));
   const data = ambilData(formData);
 
-  if (!Number.isInteger(id) || !data.nama || !Number.isFinite(data.harga)) {
+  if (
+    !Number.isInteger(id) ||
+    !data.nama ||
+    !Number.isFinite(data.harga) ||
+    data.harga < 0 ||
+    data.harga > 100_000_000
+  ) {
     redirect(`/admin/edit/${formData.get("id")}?error=validasi`);
   }
 
@@ -466,7 +483,7 @@ export async function tambahGaleri(formData: FormData) {
   if (!gambarUrl) redirect("/admin/galeri/baru?error=foto");
 
   const urutan = Math.round(Number(formData.get("urutan")) || 0);
-  const alt = String(formData.get("alt") ?? "").trim();
+  const alt = String(formData.get("alt") ?? "").trim().slice(0, 80);
 
   await db.insert(galleryItems).values({ gambarUrl, alt, urutan });
 
