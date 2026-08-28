@@ -11,6 +11,7 @@
     "db:seed": "tsx src/db/seed.ts",
     "db:seed:bulk": "tsx scripts/seed-menu-bulk.ts",
     "db:uji": "tsx scripts/uji-kapasitas.ts",
+    "db:set-foto": "tsx scripts/set-foto-semua.ts",
     "db:setup-admin": "tsx src/db/setup-admin.ts"
   },
   "dependencies": {
