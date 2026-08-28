@@ -28,6 +28,7 @@ src/
     page.tsx          # Landing page publik
     admin/            # Halaman + server actions admin
   components/         # Komponen UI (Navbar, Hero, MenuSection, Gallery, dst.)
+  lib/                # Util bersama: blob (upload foto), kripto (hash), maps (konversi embed), constants
   data/kedai.ts       # Fallback identitas & gambar hero (placeholder)
   db/
     schema.ts         # Definisi tabel Drizzle
@@ -79,6 +80,8 @@ Buka `http://localhost:3000`. Panel admin di `http://localhost:3000/admin`.
 ```bash
 npm run db:push                # Sinkronkan schema ke database
 npm run db:setup-admin         # Buat akun admin
+npm run setup:client           # Setup satu-klien: identitas + menu + galeri + admin (satu perintah)
+npm run db:audit               # Audit read-only integritas data
 npm run db:seed                # Seed data awal (berisi placeholder Unsplash)
 npm run db:seed:bulk           # Seed menu dalam jumlah besar
 npm run db:set-foto            # Set foto menu dari folder lokal (Blob)
@@ -89,13 +92,56 @@ npm run db:uji                 # Uji kapasitas/audit data
 
 > Script-script ini memuat `.env.local` sendiri, jadi cukup dijalankan via npm serta memastikan `.env.local` sudah terisi.
 
-## Menyiapkan data untuk satu klien
+## Setup otomatis untuk satu klien baru
+
+`npm run setup:client` menyiapkan semuanya lewat satu perintah:
+
+```bash
+npm run setup:client -- \
+  --nama="Kopi Senja" \
+  --tagline="Secangkir hangat di akhir hari" \
+  --wa=6281234567890 \
+  --alamat="Jl. Raya Contoh No. 123, Bandung" \
+  --maps="https://maps.app.goo.gl/xxx" \
+  --email=admin@klien.com
+```
+
+Apa yang dikerjakan:
+1. **Identitas bisnis** — nomor WA, alamat, dan maps (URL Google Maps apa pun dikonversi otomatis ke embed).
+2. **Jam buka** — di-set ke default (Senin–Jumat & Sabtu–Minggu).
+3. **Menu** — di-seed awal (tanpa foto; foto diunggah via admin).
+4. **Galeri** — di-seed awal berupa placeholder alt (foto diunggah via admin).
+5. **Akun admin** — dibuat/diperbarui (email dari `--email` atau `ADMIN_EMAIL`); password & recovery key ditampilkan sekali.
+
+Milik mana pun yang tidak di-set lewat `--flag` akan memakai nilai dari `CLIENT_*` / `ADMIN_*` di `.env.local`, atau nilai default. Jangan menimpa data menu/galeri yang sudah ada — script hanya men-seed bila tabel kosong.
+
+## Menyiapkan data untuk satu klien (manual)
 
 1. **Setup akun admin** — `npm run db:setup-admin`, lalu login di `/admin`.
 2. **Identitas bisnis** — di menu **Bisnis** (`/admin/bisnis`): nama, tagline, deskripsi, nomor WhatsApp, alamat, link maps embed, dan jam buka.
 3. **Menu** — tambah/edit/hapus menu; unggah foto per item (otomatis ke Blob).
 4. **Galeri** — tambah/edit/hapus foto suasana kafe.
 5. **Verifikasi** — buka halaman publik, pastikan data & foto tampil benar.
+
+## Uji siklus (smoke test) untuk klien baru
+
+Setelah setup, jalankan audit data lalu buku siklus fungsional:
+
+```bash
+npm run db:audit   # harus berakhir "AUDIT LULUS"
+```
+
+Checklist manual:
+1. **Login** — buka `/admin`, login dengan password yang ditampilkan saat setup.
+2. **Bisnis** — ubah WA/alamat/maps/jam buka di `/admin/bisnis` → simpan → cek tampil di halaman publik (`/`).
+3. **Menu** — tambah satu item menu dengan foto → cek muncul di `/` (dengan foto Blob).
+4. **Edit/hapus menu** — ubah nama/harga, lalu hapus → cek pembaruan tampil di `/`.
+5. **Galeri** — tambah & hapus foto galeri → cek tampil di `/`.
+6. **Sesi** — buka `/admin/pengaturan`, coba "keluar dari semua perangkat", lalu login ulang.
+7. **Recovery key** — di halaman login, "lupa password" → masukkan recovery key → set password baru → ulangi login dengan password baru.
+8. **Perangkat lain** — pastikan halaman publik responsif (mobile & desktop).
+
+> Audit memeriksa: menu lengkap & valid (nama/deskripsi/harga/kategori, URL Blob tanpa Unsplash, tanpa duplikat), galeri lengkap dengan alt, bisnis punya WA/maps valid, admin hanya 1 & bukan placeholder.
 
 ## Menyesuaikan identitas & gaya per klien
 
