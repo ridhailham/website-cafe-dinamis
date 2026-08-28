@@ -47,8 +47,14 @@ async function main() {
     console.error("DATABASE_URL tidak ditemukan di environment.");
     process.exit(1);
   }
-  if (!process.env.ADMIN_EMAIL) {
-    console.error("ADMIN_EMAIL tidak ditemukan di environment.");
+
+  const emailArg =
+    process.argv.find((a) => a.startsWith("--email="))?.split("=")[1] ?? "";
+  const email = emailArg || process.env.ADMIN_EMAIL || "";
+  if (!email) {
+    console.error(
+      "Tidak ada email. Set env ADMIN_EMAIL atau berikan argumen --email=..."
+    );
     process.exit(1);
   }
 
@@ -67,11 +73,13 @@ async function main() {
     const id = rows[0].id;
     await db
       .update(adminCredentials)
-      .set({ passwordHash, resetKeyHash, updatedAt: new Date() })
+      .set({ email, passwordHash, resetKeyHash, updatedAt: new Date() })
       .where(eq(adminCredentials.id, id));
     console.log("[setup] admin_credentials diperbarui (id " + id + ").");
   } else {
-    await db.insert(adminCredentials).values({ passwordHash, resetKeyHash });
+    await db
+      .insert(adminCredentials)
+      .values({ email, passwordHash, resetKeyHash });
     console.log("[setup] admin_credentials dibuat.");
   }
 
@@ -79,7 +87,7 @@ async function main() {
   console.log(" KREDENSIAL ADMIN — SIMPAN & SERAHKAN");
   console.log("========================================");
   console.log(` URL Admin  : /admin`);
-  console.log(` Email      : ${process.env.ADMIN_EMAIL}`);
+  console.log(` Email      : ${email}`);
   console.log(` Password   : ${password}`);
   console.log(` Recovery Key : ${recoveryKey}`);
   console.log("========================================");

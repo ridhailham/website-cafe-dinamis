@@ -87,10 +87,16 @@ export async function loginAction(
   const creds = await db.select().from(adminCredentials).limit(1);
   const cred = creds[0];
 
-  const emailBenar = email === process.env.ADMIN_EMAIL;
-  const passwordBenar = cred
-    ? await verifikasiSecret(password, cred.passwordHash)
-    : false;
+  if (!cred) {
+    return {
+      error:
+        "Akun admin belum diinisialisasi. Jalankan skrip setup terlebih dahulu.",
+    };
+  }
+
+  const emailBenar =
+    cred.email && email.toLowerCase() === cred.email.toLowerCase();
+  const passwordBenar = await verifikasiSecret(password, cred.passwordHash);
 
   if (!emailBenar || !passwordBenar) {
     await catatPercobaanGagal(email, ip);
@@ -199,6 +205,43 @@ export async function ubahSandiAction(
   await db
     .update(adminCredentials)
     .set({ passwordHash, updatedAt: new Date() })
+    .where(eq(adminCredentials.id, cred.id));
+
+  return { ok: true };
+}
+
+export type EmailState = { error?: string; ok?: boolean };
+
+export async function ubahEmailAction(
+  _prev: EmailState,
+  formData: FormData
+): Promise<EmailState> {
+  await assertAdmin();
+
+  const emailBaru = String(formData.get("emailBaru") ?? "").trim();
+  const sandi = String(formData.get("sandi") ?? "");
+
+  if (!emailBaru || !sandi) {
+    return { error: "Email dan sandi wajib diisi." };
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailBaru)) {
+    return { error: "Format email tidak valid." };
+  }
+
+  const creds = await db.select().from(adminCredentials).limit(1);
+  const cred = creds[0];
+  if (!cred) {
+    return { error: "Akun admin belum diinisialisasi." };
+  }
+
+  const cocok = await verifikasiSecret(sandi, cred.passwordHash);
+  if (!cocok) {
+    return { error: "Sandi salah." };
+  }
+
+  await db
+    .update(adminCredentials)
+    .set({ email: emailBaru, updatedAt: new Date() })
     .where(eq(adminCredentials.id, cred.id));
 
   return { ok: true };

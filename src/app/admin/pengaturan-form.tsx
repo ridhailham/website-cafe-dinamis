@@ -3,13 +3,20 @@
 import { useActionState } from "react";
 import {
   ubahSandiAction,
+  ubahEmailAction,
   regenerateRecoveryAction,
   logoutSemuaPerangkatAction,
   type SandiState,
+  type EmailState,
   type RecoveryState,
 } from "./actions";
 
 export function SettingsForm() {
+  const [emailState, emailAction, emailPending] = useActionState<
+    EmailState,
+    FormData
+  >(ubahEmailAction, {});
+
   const [sandiState, sandiAction, sandiPending] = useActionState<
     SandiState,
     FormData
@@ -22,6 +29,66 @@ export function SettingsForm() {
 
   return (
     <div className="space-y-8">
+      <section className="rounded-2xl border border-stone-200 bg-white p-6">
+        <h2 className="text-lg font-bold text-stone-900">Email Admin</h2>
+        <p className="mt-1 text-sm text-stone-500">
+          Ganti email yang dipakai untuk login. Perlu verifikasi sandi.
+        </p>
+
+        {emailState.error && (
+          <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            {emailState.error}
+          </p>
+        )}
+        {emailState.ok && (
+          <p className="mt-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
+            Email admin berhasil diubah.
+          </p>
+        )}
+
+        <form action={emailAction} className="mt-4 space-y-4">
+          <div>
+            <label
+              htmlFor="emailBaru"
+              className="mb-1 block text-sm font-medium text-stone-700"
+            >
+              Email Baru
+            </label>
+            <input
+              id="emailBaru"
+              name="emailBaru"
+              type="email"
+              required
+              autoComplete="username"
+              className="w-full rounded-lg border border-stone-300 px-4 py-2.5 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-600/20"
+              placeholder="admin@kopisenja.id"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="sandi"
+              className="mb-1 block text-sm font-medium text-stone-700"
+            >
+              Sandi (untuk verifikasi)
+            </label>
+            <input
+              id="sandi"
+              name="sandi"
+              type="password"
+              required
+              autoComplete="current-password"
+              className="w-full rounded-lg border border-stone-300 px-4 py-2.5 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-600/20"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={emailPending}
+            className="rounded-full bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700 disabled:opacity-60"
+          >
+            {emailPending ? "Menyimpan..." : "Simpan Email"}
+          </button>
+        </form>
+      </section>
       <section className="rounded-2xl border border-stone-200 bg-white p-6">
         <h2 className="text-lg font-bold text-stone-900">Ubah Sandi</h2>
         <p className="mt-1 text-sm text-stone-500">

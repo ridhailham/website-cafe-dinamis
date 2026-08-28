@@ -52,6 +52,7 @@ export const jamBuka = pgTable("jam_buka", {
 
 export const adminCredentials = pgTable("admin_credentials", {
   id: serial("id").primaryKey(),
+  email: text("email").notNull().default(""),
   passwordHash: text("password_hash").notNull(),
   resetKeyHash: text("reset_key_hash").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
