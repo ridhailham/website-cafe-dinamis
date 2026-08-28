@@ -27,6 +27,18 @@ function paginationHref(kategori: string | undefined, page: number) {
   return `/admin${qs ? `?${qs}` : ""}`;
 }
 
+// Jendela halaman yang ditampilkan di pagination: maks ~5 angka + ellipsis.
+function rentangHalaman(page: number, totalPages: number): (number | "…")[] {
+  const n = totalPages;
+  const p = page;
+  if (n <= 7) return Array.from({ length: n }, (_, i) => i + 1);
+
+  if (p <= 4) return [1, 2, 3, 4, 5, "…", n];
+  if (p >= n - 3) return [1, "…", n - 4, n - 3, n - 2, n - 1, n];
+
+  return [1, "…", p - 1, p, p + 1, "…", n];
+}
+
 export default async function AdminDashboard({
   searchParams,
 }: {
@@ -153,40 +165,57 @@ export default async function AdminDashboard({
       </div>
 
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-1 text-sm">
-          <Link
-            href={paginationHref(kategori, page - 1)}
-            className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
-              page <= 1
-                ? "pointer-events-none text-stone-300"
-                : "text-stone-600 hover:bg-stone-100"
-            }`}
-          >
-            &lsaquo; Prev
-          </Link>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+          <p className="text-xs text-stone-500">
+            Menampilkan {total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–
+            {Math.min(page * PAGE_SIZE, total)} dari {total} item
+          </p>
+
+          <div className="flex items-center justify-center gap-1 text-sm">
             <Link
-              key={p}
-              href={paginationHref(kategori, p)}
-              className={`min-w-[2rem] rounded-lg px-3 py-1.5 text-center font-medium transition-colors ${
-                p === page
-                  ? "bg-amber-600 text-white"
+              href={paginationHref(kategori, page - 1)}
+              className={`rounded-full px-3 py-1.5 font-medium transition-colors ${
+                page <= 1
+                  ? "pointer-events-none text-stone-300"
                   : "text-stone-600 hover:bg-stone-100"
               }`}
             >
-              {p}
+              &lsaquo; Prev
             </Link>
-          ))}
-          <Link
-            href={paginationHref(kategori, page + 1)}
-            className={`rounded-lg px-3 py-1.5 font-medium transition-colors ${
-              page >= totalPages
-                ? "pointer-events-none text-stone-300"
-                : "text-stone-600 hover:bg-stone-100"
-            }`}
-          >
-            Next &rsaquo;
-          </Link>
+            {rentangHalaman(page, totalPages).map((p, i) =>
+              p === "…" ? (
+                <span
+                  key={`e${i}`}
+                  className="px-1 text-stone-400"
+                  aria-hidden="true"
+                >
+                  …
+                </span>
+              ) : (
+                <Link
+                  key={p}
+                  href={paginationHref(kategori, p)}
+                  className={`min-w-[2rem] rounded-full px-3 py-1.5 text-center font-medium transition-colors ${
+                    p === page
+                      ? "bg-amber-600 text-white"
+                      : "text-stone-600 hover:bg-stone-100"
+                  }`}
+                >
+                  {p}
+                </Link>
+              )
+            )}
+            <Link
+              href={paginationHref(kategori, page + 1)}
+              className={`rounded-full px-3 py-1.5 font-medium transition-colors ${
+                page >= totalPages
+                  ? "pointer-events-none text-stone-300"
+                  : "text-stone-600 hover:bg-stone-100"
+              }`}
+            >
+              Next &rsaquo;
+            </Link>
+          </div>
         </div>
       )}
     </div>
