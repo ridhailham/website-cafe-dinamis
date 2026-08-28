@@ -1,27 +1,41 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { TriangleAlert } from "lucide-react";
 import { deleteItem } from "./actions";
 
 export function DeleteButton({ id }: { id: number }) {
+  const [minta, setMinta] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (!minta) return;
+    const timer = setTimeout(() => setMinta(false), 3000);
+    return () => clearTimeout(timer);
+  }, [minta]);
 
   return (
     <form
       ref={formRef}
       action={deleteItem}
       onSubmit={(e) => {
-        if (!confirm("Yakin ingin menghapus menu ini?")) {
+        if (!minta) {
           e.preventDefault();
+          setMinta(true);
         }
       }}
     >
       <input type="hidden" name="id" value={id} />
       <button
         type="submit"
-        className="rounded-lg px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+        className={`inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+          minta
+            ? "bg-red-600 text-white hover:bg-red-700"
+            : "text-red-600 hover:bg-red-50"
+        }`}
       >
-        Hapus
+        {minta && <TriangleAlert className="h-3.5 w-3.5" />}
+        {minta ? "Konfirmasi?" : "Hapus"}
       </button>
     </form>
   );

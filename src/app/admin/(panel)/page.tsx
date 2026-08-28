@@ -4,6 +4,7 @@ import { Pencil, Plus } from "lucide-react";
 import { db } from "@/db";
 import { menuItems } from "@/db/schema";
 import { DeleteButton } from "../delete-button";
+import { AdminToast, pesanOk } from "../alert";
 import { formatHarga } from "@/lib/constants";
 
 export const metadata = {
@@ -28,11 +29,12 @@ function paginationHref(kategori: string | undefined, page: number) {
 export default async function AdminDashboard({
   searchParams,
 }: {
-  searchParams: Promise<{ kategori?: string; page?: string }>;
+  searchParams: Promise<{ kategori?: string; page?: string; ok?: string }>;
 }) {
-  const { kategori: rawKat, page: rawPage } = await searchParams;
+  const { kategori: rawKat, page: rawPage, ok } = await searchParams;
   const kategori =
     rawKat === "Minuman" || rawKat === "Makanan" ? rawKat : undefined;
+  const sukses = pesanOk(ok);
 
   const where = kategori ? eq(menuItems.kategori, kategori) : undefined;
 
@@ -54,6 +56,8 @@ export default async function AdminDashboard({
 
   return (
     <div>
+      {sukses && <AdminToast type="success" pesan={sukses} />}
+
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-stone-900">Kelola Menu</h1>

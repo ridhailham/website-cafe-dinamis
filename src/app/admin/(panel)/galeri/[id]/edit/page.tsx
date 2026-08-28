@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { galleryItems } from "@/db/schema";
 import { GaleriForm } from "../../../../galeri-form";
-import { PesanError } from "../../../../menu-form";
+import { AdminToast, pesanError } from "../../../../alert";
 
 export const metadata = {
   title: "Edit Foto Galeri — Admin Kopi Senja",
@@ -21,6 +21,7 @@ export default async function EditGaleriPage({
   const { id } = await params;
   const { error } = await searchParams;
   const itemId = Number(id);
+  const pesan = pesanError(error);
 
   if (!Number.isInteger(itemId)) notFound();
 
@@ -33,6 +34,8 @@ export default async function EditGaleriPage({
 
   return (
     <div className="mx-auto max-w-2xl">
+      {pesan && <AdminToast type="error" pesan={pesan} />}
+
       <Link
         href="/admin/galeri"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-amber-700"
@@ -43,7 +46,6 @@ export default async function EditGaleriPage({
 
       <h1 className="mb-6 text-xl font-bold text-stone-900">Edit Foto Galeri</h1>
 
-      <PesanError kode={error} />
       <GaleriForm item={item} />
     </div>
   );

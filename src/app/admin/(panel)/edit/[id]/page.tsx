@@ -4,7 +4,8 @@ import { eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
 import { db } from "@/db";
 import { menuItems } from "@/db/schema";
-import { MenuForm, PesanError } from "../../../menu-form";
+import { MenuForm } from "../../../menu-form";
+import { AdminToast, pesanError } from "../../../alert";
 
 export const metadata = {
   title: "Edit Menu — Admin Kopi Senja",
@@ -19,6 +20,7 @@ export default async function EditMenuPage({
 }) {
   const [{ id }, { error }] = await Promise.all([params, searchParams]);
   const itemId = Number(id);
+  const pesan = pesanError(error);
 
   if (!Number.isInteger(itemId)) notFound();
 
@@ -32,6 +34,8 @@ export default async function EditMenuPage({
 
   return (
     <div className="mx-auto max-w-2xl">
+      {pesan && <AdminToast type="error" pesan={pesan} />}
+
       <Link
         href="/admin"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-amber-700"
@@ -44,7 +48,6 @@ export default async function EditMenuPage({
         Edit: {item.nama}
       </h1>
 
-      <PesanError kode={error} />
       <MenuForm item={item} />
     </div>
   );

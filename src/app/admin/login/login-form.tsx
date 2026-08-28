@@ -8,6 +8,7 @@ import {
   type LoginState,
   type ResetState,
 } from "../actions";
+import { AdminBanner } from "../alert";
 
 export function LoginForm() {
   const [mode, setMode] = useState<"login" | "recovery">("login");
@@ -26,11 +27,7 @@ export function LoginForm() {
     <div className="space-y-4">
       {mode === "login" ? (
         <>
-          {loginState.error && (
-            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-              {loginState.error}
-            </p>
-          )}
+          {loginState.error && <AdminBanner type="error" pesan={loginState.error} />}
 
           <form action={loginFormAction} className="space-y-4">
             <div>
@@ -90,23 +87,20 @@ export function LoginForm() {
         </>
       ) : (
         <>
-          {resetState.error && (
-            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-              {resetState.error}
-            </p>
-          )}
+          {resetState.error && <AdminBanner type="error" pesan={resetState.error} />}
 
           {resetState.ok ? (
             <div className="space-y-3">
-              <p className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
-                Password berhasil direset. Silakan masuk dengan password baru.
-              </p>
+              <AdminBanner
+                type="success"
+                pesan="Password berhasil direset. Silakan masuk dengan password baru."
+              />
               {resetState.key && (
-                <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3">
+                <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3">
                   <p className="text-sm font-medium text-amber-900">
                     Recovery Key baru (simpan baik-baik):
                   </p>
-                  <p className="mt-2 break-all rounded bg-white px-3 py-2 font-mono text-sm text-stone-800">
+                  <p className="mt-2 break-all rounded-lg bg-white px-3 py-2 font-mono text-sm text-stone-800 shadow-sm">
                     {resetState.key}
                   </p>
                   <p className="mt-2 text-xs text-amber-800">

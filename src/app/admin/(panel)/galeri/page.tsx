@@ -4,12 +4,19 @@ import { Pencil, Plus } from "lucide-react";
 import { db } from "@/db";
 import { galleryItems } from "@/db/schema";
 import { DeleteGalleryButton } from "../../delete-gallery-button";
+import { AdminToast, pesanOk } from "../../alert";
 
 export const metadata = {
   title: "Kelola Galeri — Admin Kopi Senja",
 };
 
-export default async function AdminGaleri() {
+export default async function AdminGaleri({
+  searchParams,
+}: {
+  searchParams: Promise<{ ok?: string }>;
+}) {
+  const { ok } = await searchParams;
+  const sukses = pesanOk(ok);
   const items = await db
     .select()
     .from(galleryItems)
@@ -17,6 +24,8 @@ export default async function AdminGaleri() {
 
   return (
     <div>
+      {sukses && <AdminToast type="success" pesan={sukses} />}
+
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-stone-900">Kelola Galeri</h1>

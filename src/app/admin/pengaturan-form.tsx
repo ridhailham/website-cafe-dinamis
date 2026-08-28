@@ -10,6 +10,7 @@ import {
   type EmailState,
   type RecoveryState,
 } from "./actions";
+import { AdminBanner } from "./alert";
 
 export function SettingsForm() {
   const [emailState, emailAction, emailPending] = useActionState<
@@ -36,14 +37,14 @@ export function SettingsForm() {
         </p>
 
         {emailState.error && (
-          <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-            {emailState.error}
-          </p>
+          <div className="mt-4">
+            <AdminBanner type="error" pesan={emailState.error} />
+          </div>
         )}
         {emailState.ok && (
-          <p className="mt-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
-            Email admin berhasil diubah.
-          </p>
+          <div className="mt-4">
+            <AdminBanner type="success" pesan="Email admin berhasil diubah." />
+          </div>
         )}
 
         <form action={emailAction} className="mt-4 space-y-4">
@@ -96,14 +97,14 @@ export function SettingsForm() {
         </p>
 
         {sandiState.error && (
-          <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-            {sandiState.error}
-          </p>
+          <div className="mt-4">
+            <AdminBanner type="error" pesan={sandiState.error} />
+          </div>
         )}
         {sandiState.ok && (
-          <p className="mt-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">
-            Password berhasil diubah.
-          </p>
+          <div className="mt-4">
+            <AdminBanner type="success" pesan="Password berhasil diubah." />
+          </div>
         )}
 
         <form action={sandiAction} className="mt-4 space-y-4">
@@ -177,16 +178,16 @@ export function SettingsForm() {
         </p>
 
         {recState.error && (
-          <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-            {recState.error}
-          </p>
+          <div className="mt-4">
+            <AdminBanner type="error" pesan={recState.error} />
+          </div>
         )}
         {recState.key && (
-          <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3">
-            <p className="text-sm font-medium text-amber-900">
+          <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3">
+            <p className="flex items-center gap-2 text-sm font-semibold text-amber-900">
               Recovery Key baru (simpan baik-baik):
             </p>
-            <p className="mt-2 break-all rounded bg-white px-3 py-2 font-mono text-sm text-stone-800">
+            <p className="mt-2 rounded-lg bg-white px-3 py-2 break-all font-mono text-sm text-stone-800 shadow-sm">
               {recState.key}
             </p>
             <p className="mt-2 text-xs text-amber-800">

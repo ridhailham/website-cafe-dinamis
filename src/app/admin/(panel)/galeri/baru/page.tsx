@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { GaleriForm } from "../../../galeri-form";
-import { PesanError } from "../../../menu-form";
+import { AdminToast, pesanError } from "../../../alert";
 
 export const metadata = {
   title: "Tambah Foto Galeri — Admin Kopi Senja",
@@ -13,9 +13,12 @@ export default async function TambahGaleriPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
+  const pesan = pesanError(error);
 
   return (
     <div className="mx-auto max-w-2xl">
+      {pesan && <AdminToast type="error" pesan={pesan} />}
+
       <Link
         href="/admin/galeri"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-amber-700"
@@ -28,7 +31,6 @@ export default async function TambahGaleriPage({
         Tambah Foto Galeri
       </h1>
 
-      <PesanError kode={error} />
       <GaleriForm />
     </div>
   );

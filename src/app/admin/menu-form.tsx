@@ -11,28 +11,6 @@ const labelClass = "mb-1 block text-sm font-medium text-stone-700";
 const inputClass =
   "w-full rounded-lg border border-stone-300 px-4 py-2.5 text-stone-900 focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-600/20";
 
-export function PesanError({ kode }: { kode?: string }) {
-  if (!kode) return null;
-
-  const pesan: Record<string, string> = {
-    tipe: "File harus berupa gambar (JPG, PNG, atau WebP).",
-    ukuran: "Ukuran foto maksimal 5 MB.",
-    wa: "Nomor WhatsApp wajib diisi dengan benar.",
-    token:
-      "Fitur foto belum aktif karena penyimpanan Vercel Blob belum terhubung. Menu tetap tersimpan tanpa foto — foto akan bisa diunggah setelah website di-deploy.",
-    validasi: "Nama dan harga wajib diisi dengan benar.",
-    foto: "Menu baru wajib memiliki foto.",
-    upload: "Gagal meng-upload foto. Periksa koneksi dan coba lagi.",
-    maps: "Link peta tidak valid. Tempel link Google Maps biasa atau link 'Bagikan' (maps.app.goo.gl) — akan dikonversi otomatis.",
-  };
-
-  return (
-    <p className="mb-5 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
-      {pesan[kode] ?? "Terjadi kesalahan. Coba lagi."}
-    </p>
-  );
-}
-
 export function MenuForm({ item }: Props) {
   const sedangEdit = Boolean(item);
   const [preview, setPreview] = useState<string | null>(null);

@@ -277,7 +277,7 @@ export async function regenerateRecoveryAction(
 export async function logoutSemuaPerangkatAction() {
   await assertAdmin();
   await revokeAllSessionsExceptCurrent();
-  redirect("/admin/pengaturan");
+  redirect("/admin/pengaturan?ok=logout_all");
 }
 
 function ambilData(formData: FormData) {
@@ -363,7 +363,7 @@ export async function createItem(formData: FormData) {
   });
 
   segarkanCache();
-  redirect("/admin");
+  redirect("/admin?ok=menu_tambah");
 }
 
 export async function updateItem(formData: FormData) {
@@ -403,7 +403,7 @@ export async function updateItem(formData: FormData) {
   if (gambarUrl) await hapusFotoLama(lama?.gambarUrl ?? null);
 
   segarkanCache();
-  redirect("/admin");
+  redirect("/admin?ok=menu_ubah");
 }
 
 export async function deleteItem(formData: FormData) {
@@ -422,7 +422,7 @@ export async function deleteItem(formData: FormData) {
     segarkanCache();
   }
 
-  redirect("/admin");
+  redirect("/admin?ok=menu_hapus");
 }
 
 async function simpanFotoGaleri(
@@ -472,7 +472,7 @@ export async function tambahGaleri(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/admin/galeri");
-  redirect("/admin/galeri");
+  redirect("/admin/galeri?ok=galeri_tambah");
 }
 
 export async function hapusGaleri(formData: FormData) {
@@ -492,7 +492,7 @@ export async function hapusGaleri(formData: FormData) {
     revalidatePath("/admin/galeri");
   }
 
-  redirect("/admin/galeri");
+  redirect("/admin/galeri?ok=galeri_hapus");
 }
 
 export async function ubahGaleri(formData: FormData) {
@@ -523,7 +523,7 @@ export async function ubahGaleri(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/admin/galeri");
-  redirect("/admin/galeri");
+  redirect("/admin/galeri?ok=galeri_ubah");
 }
 
 function ekstrakKoordinat(url: string): string | null {
@@ -636,5 +636,5 @@ export async function updateBisnis(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/admin/bisnis");
-  redirect("/admin/bisnis?berhasil=1");
+  redirect("/admin/bisnis?ok=bisnis");
 }
