@@ -13,7 +13,8 @@
     "db:uji": "tsx scripts/uji-kapasitas.ts",
     "db:set-foto": "tsx scripts/set-foto-semua.ts",
     "db:upload-foto-per-menu": "tsx scripts/upload-foto-per-menu.ts",
-    "db:setup-admin": "tsx src/db/setup-admin.ts"
+    "db:setup-admin": "tsx src/db/setup-admin.ts",
+    "db:ganti-galeri": "tsx scripts/ganti-galeri.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
