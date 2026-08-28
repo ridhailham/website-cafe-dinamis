@@ -11,7 +11,7 @@ export const menuItems = pgTable("menu_items", {
   nama: text("nama").notNull(),
   deskripsi: text("deskripsi").notNull().default(""),
   harga: integer("harga").notNull(),
-  kategori: text("kategori").notNull().default("Kopi"),
+  kategori: text("kategori").notNull().default("Minuman"),
   urutan: integer("urutan").notNull().default(0),
   gambarUrl: text("gambar_url"),
   createdAt: timestamp("created_at", { withTimezone: true })

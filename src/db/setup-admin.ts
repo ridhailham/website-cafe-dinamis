@@ -1,46 +1,12 @@
 import { config } from "dotenv";
-import { randomBytes } from "node:crypto";
-import { scrypt } from "node:crypto";
-import { promisify } from "node:util";
 import { eq } from "drizzle-orm";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { adminCredentials } from "./schema";
-
-const scryptAsync = promisify(scrypt);
+import { acakHex, buatPasswordAwal, hashSecret } from "@/lib/kripto";
 
 config({ path: ".env.local" });
 config();
-
-async function hash(value: string): Promise<string> {
-  const salt = randomBytes(16);
-  const N = 16384;
-  const r = 8;
-  const p = 1;
-  const keyLength = 64;
-  const derived = (await scryptAsync(value, salt, keyLength)) as Buffer;
-  return `scrypt$${N}$${r}$${p}$${salt.toString("hex")}$${derived.toString(
-    "hex"
-  )}`;
-}
-
-function acakHex(panjang: number): string {
-  return randomBytes(panjang).toString("hex");
-}
-
-function acakBaca(): string {
-  const kata = [
-    "kopi",
-    "senja",
-    "hangat",
-    "pagi",
-    "malam",
-    "alam",
-    "teman",
-    "cerita",
-  ];
-  return kata[Math.floor(Math.random() * kata.length)];
-}
 
 async function main() {
   if (!process.env.DATABASE_URL) {
@@ -61,12 +27,11 @@ async function main() {
   const db = drizzle(neon(process.env.DATABASE_URL));
 
   const password =
-    process.env.ADMIN_INITIAL_PASSWORD ||
-    `${acakBaca()}-${acakBaca()}-${acakHex(2)}`;
+    process.env.ADMIN_INITIAL_PASSWORD || buatPasswordAwal();
   const recoveryKey = `kopi-${acakHex(10)}-${acakHex(6)}`;
 
-  const passwordHash = await hash(password);
-  const resetKeyHash = await hash(recoveryKey);
+  const passwordHash = await hashSecret(password);
+  const resetKeyHash = await hashSecret(recoveryKey);
 
   const rows = await db.select().from(adminCredentials).limit(1);
   if (rows.length > 0) {

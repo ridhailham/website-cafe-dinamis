@@ -4,7 +4,6 @@ import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { eq, and, gt } from "drizzle-orm";
-import { put, del } from "@vercel/blob";
 import { db } from "@/db";
 import {
   adminCredentials,
@@ -19,13 +18,12 @@ import {
   createSession,
   destroySession,
   getActiveSession,
-  hashSecret,
-  verifikasiSecret,
   revokeAllSessionsExceptCurrent,
 } from "@/lib/auth";
+import { simpanFoto, hapusFotoLama } from "@/lib/blob";
+import { hashSecret, verifikasiSecret } from "@/lib/kripto";
+import { ubahKeEmbedMaps } from "@/lib/maps";
 import { KATEGORI_OPTIONS, type Kategori } from "@/lib/constants";
-
-const MAX_FOTO_BYTES = 5 * 1024 * 1024;
 
 export type LoginState = { error?: string };
 
@@ -299,57 +297,8 @@ function ambilData(formData: FormData) {
 function segarkanCache() {
   revalidatePath("/");
   revalidatePath("/admin");
-}
-
-// Simpan foto ke Vercel Blob. Mengembalikan URL, atau null jika tidak ada
-// file / fitur belum terhubung (tanpa token). Gagal validasi melempar redirect.
-async function simpanFoto(
-  formData: FormData,
-  namaMenu: string,
-  tujuanForm: string
-): Promise<string | null> {
-  const file = formData.get("foto");
-
-  if (!(file instanceof File) || file.size === 0) return null;
-
-  if (!file.type.startsWith("image/")) {
-    redirect(`${tujuanForm}?error=tipe`);
-  }
-  if (file.size > MAX_FOTO_BYTES) {
-    redirect(`${tujuanForm}?error=ukuran`);
-  }
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    console.warn(
-      "[blob] BLOB_READ_WRITE_TOKEN belum tersedia — menu disimpan tanpa foto."
-    );
-    redirect(`${tujuanForm}?error=token`);
-  }
-
-  const bersih = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-  const slug = bersih(namaMenu) || "menu";
-  const ekstensi =
-    (file.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") ||
-    "jpg";
-  const uniqueId = crypto.randomUUID().slice(0, 8);
-
-  try {
-    const blob = await put(`menu/${slug}-${uniqueId}.${ekstensi}`, file, {
-      access: "public",
-    });
-    return blob.url;
-  } catch (err) {
-    console.warn("[blob] Gagal meng-upload foto:", err);
-    redirect(`${tujuanForm}?error=upload`);
-  }
-}
-
-async function hapusFotoLama(gambarUrl: string | null) {
-  if (!gambarUrl) return;
-  try {
-    await del(gambarUrl);
-  } catch (err) {
-    console.warn("[blob] Gagal menghapus foto lama:", err);
-  }
+  revalidatePath("/admin/galeri");
+  revalidatePath("/admin/bisnis");
 }
 
 export async function createItem(formData: FormData) {
@@ -365,7 +314,12 @@ export async function createItem(formData: FormData) {
     redirect("/admin/baru?error=validasi");
   }
 
-  const gambarUrl = await simpanFoto(formData, data.nama, "/admin/baru");
+  const gambarUrl = await simpanFoto(
+    formData,
+    "menu",
+    "/admin/baru",
+    data.nama
+  );
   if (!gambarUrl) redirect("/admin/baru?error=foto");
 
   await db.insert(menuItems).values({
@@ -402,8 +356,9 @@ export async function updateItem(formData: FormData) {
 
   const gambarUrl = await simpanFoto(
     formData,
-    data.nama,
-    `/admin/edit/${id}`
+    "menu",
+    `/admin/edit/${id}`,
+    data.nama
   );
 
   // Catatan: upload → update DB → delete lama. Jika crash setelah DB update
@@ -442,44 +397,10 @@ export async function deleteItem(formData: FormData) {
   redirect("/admin?ok=menu_hapus");
 }
 
-async function simpanFotoGaleri(
-  formData: FormData,
-  tujuanForm: string
-): Promise<string | null> {
-  const file = formData.get("foto");
-
-  if (!(file instanceof File) || file.size === 0) return null;
-
-  if (!file.type.startsWith("image/")) {
-    redirect(`${tujuanForm}?error=tipe`);
-  }
-  if (file.size > MAX_FOTO_BYTES) {
-    redirect(`${tujuanForm}?error=ukuran`);
-  }
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    redirect(`${tujuanForm}?error=token`);
-  }
-
-  const ekstensi =
-    (file.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") ||
-    "jpg";
-  const uniqueId = crypto.randomUUID().slice(0, 8);
-
-  try {
-    const blob = await put(`galeri/suasana-${uniqueId}.${ekstensi}`, file, {
-      access: "public",
-    });
-    return blob.url;
-  } catch (err) {
-    console.warn("[blob] Gagal meng-upload foto galeri:", err);
-    redirect(`${tujuanForm}?error=upload`);
-  }
-}
-
 export async function tambahGaleri(formData: FormData) {
   await assertAdmin();
 
-  const gambarUrl = await simpanFotoGaleri(formData, "/admin/galeri/baru");
+  const gambarUrl = await simpanFoto(formData, "galeri", "/admin/galeri/baru");
   if (!gambarUrl) redirect("/admin/galeri/baru?error=foto");
 
   const urutan = Math.round(Number(formData.get("urutan")) || 0);
@@ -487,8 +408,7 @@ export async function tambahGaleri(formData: FormData) {
 
   await db.insert(galleryItems).values({ gambarUrl, alt, urutan });
 
-  revalidatePath("/");
-  revalidatePath("/admin/galeri");
+  segarkanCache();
   redirect("/admin/galeri?ok=galeri_tambah");
 }
 
@@ -505,8 +425,7 @@ export async function hapusGaleri(formData: FormData) {
 
     await db.delete(galleryItems).where(eq(galleryItems.id, id));
     await hapusFotoLama(item?.gambarUrl ?? null);
-    revalidatePath("/");
-    revalidatePath("/admin/galeri");
+    segarkanCache();
   }
 
   redirect("/admin/galeri?ok=galeri_hapus");
@@ -529,7 +448,11 @@ export async function ubahGaleri(formData: FormData) {
     .limit(1);
   if (!lama) notFound();
 
-  const gambarUrl = await simpanFotoGaleri(formData, `/admin/galeri/${id}/edit`);
+  const gambarUrl = await simpanFoto(
+    formData,
+    "galeri",
+    `/admin/galeri/${id}/edit`
+  );
 
   await db
     .update(galleryItems)
@@ -538,70 +461,8 @@ export async function ubahGaleri(formData: FormData) {
 
   if (gambarUrl) await hapusFotoLama(lama.gambarUrl);
 
-  revalidatePath("/");
-  revalidatePath("/admin/galeri");
+  segarkanCache();
   redirect("/admin/galeri?ok=galeri_ubah");
-}
-
-function ekstrakKoordinat(url: string): string | null {
-  const m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if (m) return `${m[1]},${m[2]}`;
-  const ll = url.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if (ll) return `${ll[1]},${ll[2]}`;
-  return null;
-}
-
-// Mengubah berbagai bentuk URL Google Maps menjadi URL yang bisa di-render
-// di dalam <iframe>. Mengembalikan null jika tidak bisa dikonversi.
-async function ubahKeEmbedMaps(url: string): Promise<string | null> {
-  const bersih = url.trim();
-  if (!bersih) return "";
-
-  // Sudah berupa link embed — pakai apa adanya.
-  if (
-    bersih.includes("/maps/embed?") ||
-    bersih.includes("output=embed")
-  ) {
-    return bersih;
-  }
-
-  // Bukan URL Google Maps — tolak.
-  if (!/^(https?:\/\/)([a-z0-9-]+\.)?google\.(com|co\.id)\//i.test(bersih)) {
-    return null;
-  }
-
-  let target = bersih;
-
-  // Resolve short-link maps.app.goo.gl ke URL final.
-  if (/maps\.app\.goo\.gl\//i.test(target)) {
-    try {
-      const res = await fetch(target, {
-        method: "HEAD",
-        redirect: "follow",
-      });
-      target = res.url || target;
-    } catch {
-      return null;
-    }
-  }
-
-  if (target.includes("/maps/embed?") || target.includes("output=embed")) {
-    return target;
-  }
-
-  // Ambil koordinat lalu bangun embed via ?q=LAT,LNG&output=embed.
-  const koordinat = ekstrakKoordinat(target);
-  if (koordinat) {
-    return `https://www.google.com/maps?q=${koordinat}&output=embed`;
-  }
-
-  // Ambil query ?q=... lalu tambahkan output=embed.
-  const q = target.match(/[?&]q=([^&]+)/);
-  if (q) {
-    return `https://www.google.com/maps?q=${q[1]}&output=embed`;
-  }
-
-  return null;
 }
 
 export async function updateBisnis(formData: FormData) {
@@ -651,7 +512,6 @@ export async function updateBisnis(formData: FormData) {
       .values(jamList.map((j, i) => ({ ...j, urutan: i })));
   }
 
-  revalidatePath("/");
-  revalidatePath("/admin/bisnis");
+  segarkanCache();
   redirect("/admin/bisnis?ok=bisnis");
 }
