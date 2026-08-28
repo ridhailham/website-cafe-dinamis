@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { createItem, updateItem } from "./actions";
 import { type MenuItem } from "@/db/schema";
 import { KATEGORI_OPTIONS } from "@/lib/constants";
+import { ConfirmDialog } from "./confirm-dialog";
 
 type Props = { item?: MenuItem };
 
@@ -14,6 +15,9 @@ const inputClass =
 export function MenuForm({ item }: Props) {
   const sedangEdit = Boolean(item);
   const [preview, setPreview] = useState<string | null>(null);
+  const [mintaSimpan, setMintaSimpan] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const terkonfirmasi = useRef(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleFoto = () => {
@@ -29,7 +33,16 @@ export function MenuForm({ item }: Props) {
 
   return (
     <form
+      ref={formRef}
       action={sedangEdit ? updateItem : createItem}
+      onSubmit={(e) => {
+        if (terkonfirmasi.current) {
+          terkonfirmasi.current = false;
+          return;
+        }
+        e.preventDefault();
+        setMintaSimpan(true);
+      }}
       className="space-y-5 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm"
     >
       {item && <input type="hidden" name="id" value={item.id} />}
@@ -180,6 +193,23 @@ export function MenuForm({ item }: Props) {
           {sedangEdit ? "Simpan Perubahan" : "Tambah Menu"}
         </button>
       </div>
+
+      <ConfirmDialog
+        open={mintaSimpan}
+        judul={sedangEdit ? "Simpan perubahan menu?" : "Tambah menu baru?"}
+        pesan={
+          sedangEdit
+            ? "Pastikan nama, harga, dan foto sudah benar. Menu akan diperbarui."
+            : "Pastikan nama, harga, dan foto sudah benar. Menu baru akan ditambahkan ke halaman."
+        }
+        labelKonfirmasi={sedangEdit ? "Ya, Simpan" : "Ya, Tambah"}
+        onCancel={() => setMintaSimpan(false)}
+        onConfirm={() => {
+          setMintaSimpan(false);
+          terkonfirmasi.current = true;
+          formRef.current?.requestSubmit();
+        }}
+      />
     </form>
   );
 }

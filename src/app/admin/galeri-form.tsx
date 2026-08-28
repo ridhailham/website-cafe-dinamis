@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { tambahGaleri, ubahGaleri } from "./actions";
 import { type GalleryItem } from "@/db/schema";
+import { ConfirmDialog } from "./confirm-dialog";
 
 type Props = { item?: GalleryItem };
 
@@ -24,6 +25,9 @@ export function GaleriForm({ item }: Props) {
   const sedangEdit = Boolean(item);
   const [preview, setPreview] = useState<string | null>(null);
   const [peringatan, setPeringatan] = useState(false);
+  const [mintaSimpan, setMintaSimpan] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const terkonfirmasi = useRef(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleFoto = () => {
@@ -40,7 +44,16 @@ export function GaleriForm({ item }: Props) {
 
   return (
     <form
+      ref={formRef}
       action={sedangEdit ? ubahGaleri : tambahGaleri}
+      onSubmit={(e) => {
+        if (terkonfirmasi.current) {
+          terkonfirmasi.current = false;
+          return;
+        }
+        e.preventDefault();
+        setMintaSimpan(true);
+      }}
       className="space-y-5 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm"
     >
       {item && <input type="hidden" name="id" value={item.id} />}
@@ -147,6 +160,23 @@ export function GaleriForm({ item }: Props) {
           {sedangEdit ? "Simpan Perubahan" : "Simpan Foto"}
         </button>
       </div>
+
+      <ConfirmDialog
+        open={mintaSimpan}
+        judul={sedangEdit ? "Simpan perubahan foto?" : "Tambah foto baru?"}
+        pesan={
+          sedangEdit
+            ? "Pastikan foto dan keterangan sudah benar. Foto galeri akan diperbarui."
+            : "Pastikan foto sudah benar. Foto galeri baru akan ditambahkan."
+        }
+        labelKonfirmasi={sedangEdit ? "Ya, Simpan" : "Ya, Tambah"}
+        onCancel={() => setMintaSimpan(false)}
+        onConfirm={() => {
+          setMintaSimpan(false);
+          terkonfirmasi.current = true;
+          formRef.current?.requestSubmit();
+        }}
+      />
     </form>
   );
 }

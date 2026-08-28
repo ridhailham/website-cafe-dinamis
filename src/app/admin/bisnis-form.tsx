@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { Plus, X } from "lucide-react";
 import { updateBisnis } from "./actions";
 import type { Bisnis, JamBuka } from "@/db/schema";
+import { ConfirmDialog } from "./confirm-dialog";
 
 type Props = {
   bisnis?: Bisnis;
@@ -16,6 +17,9 @@ const inputClass =
 
 export function BisnisForm({ bisnis, jamBuka = [] }: Props) {
   const nextId = useRef(1000000);
+  const [mintaSimpan, setMintaSimpan] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const terkonfirmasi = useRef(false);
   const [daftarJam, setDaftarJam] = useState<
     { id: number; hari: string; jam: string }[]
   >(() =>
@@ -34,7 +38,16 @@ export function BisnisForm({ bisnis, jamBuka = [] }: Props) {
 
   return (
     <form
+      ref={formRef}
       action={updateBisnis}
+      onSubmit={(e) => {
+        if (terkonfirmasi.current) {
+          terkonfirmasi.current = false;
+          return;
+        }
+        e.preventDefault();
+        setMintaSimpan(true);
+      }}
       className="space-y-6 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm"
     >
       <div className="grid gap-5 sm:grid-cols-2">
@@ -157,6 +170,19 @@ export function BisnisForm({ bisnis, jamBuka = [] }: Props) {
           Simpan Perubahan
         </button>
       </div>
+
+      <ConfirmDialog
+        open={mintaSimpan}
+        judul="Simpan data bisnis?"
+        pesan="Pastikan nomor WhatsApp, alamat, peta, dan jam buka sudah benar. Perubahan akan tampil di halaman depan."
+        labelKonfirmasi="Ya, Simpan"
+        onCancel={() => setMintaSimpan(false)}
+        onConfirm={() => {
+          setMintaSimpan(false);
+          terkonfirmasi.current = true;
+          formRef.current?.requestSubmit();
+        }}
+      />
     </form>
   );
 }

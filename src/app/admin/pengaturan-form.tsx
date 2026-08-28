@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
 import {
   ubahSandiAction,
   ubahEmailAction,
@@ -11,22 +11,36 @@ import {
   type RecoveryState,
 } from "./actions";
 import { AdminBanner } from "./alert";
+import { ConfirmDialog } from "./confirm-dialog";
 
 export function SettingsForm() {
   const [emailState, emailAction, emailPending] = useActionState<
     EmailState,
     FormData
   >(ubahEmailAction, {});
+  const emailFormRef = useRef<HTMLFormElement>(null);
+  const emailOk = useRef(false);
+  const [bukaEmail, setBukaEmail] = useState(false);
 
   const [sandiState, sandiAction, sandiPending] = useActionState<
     SandiState,
     FormData
   >(ubahSandiAction, {});
+  const sandiFormRef = useRef<HTMLFormElement>(null);
+  const sandiOk = useRef(false);
+  const [bukaSandi, setBukaSandi] = useState(false);
 
   const [recState, recAction, recPending] = useActionState<
     RecoveryState,
     FormData
   >(regenerateRecoveryAction, {});
+  const recFormRef = useRef<HTMLFormElement>(null);
+  const recOk = useRef(false);
+  const [bukaRec, setBukaRec] = useState(false);
+
+  const [bukaLogout, setBukaLogout] = useState(false);
+  const logoutFormRef = useRef<HTMLFormElement>(null);
+  const logoutOk = useRef(false);
 
   return (
     <div className="space-y-8">
@@ -47,7 +61,19 @@ export function SettingsForm() {
           </div>
         )}
 
-        <form action={emailAction} className="mt-4 space-y-4">
+        <form
+          ref={emailFormRef}
+          action={emailAction}
+          onSubmit={(e) => {
+            if (emailOk.current) {
+              emailOk.current = false;
+              return;
+            }
+            e.preventDefault();
+            setBukaEmail(true);
+          }}
+          className="mt-4 space-y-4"
+        >
           <div>
             <label
               htmlFor="emailBaru"
@@ -89,6 +115,19 @@ export function SettingsForm() {
             {emailPending ? "Menyimpan..." : "Simpan Email"}
           </button>
         </form>
+
+        <ConfirmDialog
+          open={bukaEmail}
+          judul="Simpan email baru?"
+          pesan="Email login admin akan diganti. Gunakan email baru itu untuk login berikutnya."
+          labelKonfirmasi="Ya, Simpan"
+          onCancel={() => setBukaEmail(false)}
+          onConfirm={() => {
+            setBukaEmail(false);
+            emailOk.current = true;
+            emailFormRef.current?.requestSubmit();
+          }}
+        />
       </section>
       <section className="rounded-2xl border border-stone-200 bg-white p-6">
         <h2 className="text-lg font-bold text-stone-900">Ubah Sandi</h2>
@@ -107,7 +146,19 @@ export function SettingsForm() {
           </div>
         )}
 
-        <form action={sandiAction} className="mt-4 space-y-4">
+        <form
+          ref={sandiFormRef}
+          action={sandiAction}
+          onSubmit={(e) => {
+            if (sandiOk.current) {
+              sandiOk.current = false;
+              return;
+            }
+            e.preventDefault();
+            setBukaSandi(true);
+          }}
+          className="mt-4 space-y-4"
+        >
           <div>
             <label
               htmlFor="sandiLama"
@@ -167,6 +218,19 @@ export function SettingsForm() {
             {sandiPending ? "Menyimpan..." : "Simpan Sandi"}
           </button>
         </form>
+
+        <ConfirmDialog
+          open={bukaSandi}
+          judul="Simpan sandi baru?"
+          pesan="Password login admin Anda akan diganti sesuai isian di atas."
+          labelKonfirmasi="Ya, Simpan"
+          onCancel={() => setBukaSandi(false)}
+          onConfirm={() => {
+            setBukaSandi(false);
+            sandiOk.current = true;
+            sandiFormRef.current?.requestSubmit();
+          }}
+        />
       </section>
 
       <section className="rounded-2xl border border-stone-200 bg-white p-6">
@@ -196,7 +260,19 @@ export function SettingsForm() {
           </div>
         )}
 
-        <form action={recAction} className="mt-4">
+        <form
+          ref={recFormRef}
+          action={recAction}
+          onSubmit={(e) => {
+            if (recOk.current) {
+              recOk.current = false;
+              return;
+            }
+            e.preventDefault();
+            setBukaRec(true);
+          }}
+          className="mt-4"
+        >
           <button
             type="submit"
             disabled={recPending}
@@ -205,6 +281,19 @@ export function SettingsForm() {
             {recPending ? "Membuat..." : "Generate Recovery Key"}
           </button>
         </form>
+
+        <ConfirmDialog
+          open={bukaRec}
+          judul="Generate recovery key baru?"
+          pesan="Kunci baru akan dibuat dan kunci lama langsung nonaktif. Pastikan Anda menyimpan kunci baru."
+          labelKonfirmasi="Ya, Generate"
+          onCancel={() => setBukaRec(false)}
+          onConfirm={() => {
+            setBukaRec(false);
+            recOk.current = true;
+            recFormRef.current?.requestSubmit();
+          }}
+        />
       </section>
 
       <section className="rounded-2xl border border-stone-200 bg-white p-6">
@@ -215,7 +304,19 @@ export function SettingsForm() {
           Keluar dari semua perangkat lain (misalnya jika handphone atau laptop
           hilang / dicurigai diretas).
         </p>
-        <form action={logoutSemuaPerangkatAction} className="mt-4">
+        <form
+          ref={logoutFormRef}
+          action={logoutSemuaPerangkatAction}
+          onSubmit={(e) => {
+            if (logoutOk.current) {
+              logoutOk.current = false;
+              return;
+            }
+            e.preventDefault();
+            setBukaLogout(true);
+          }}
+          className="mt-4"
+        >
           <button
             type="submit"
             className="rounded-full border border-red-300 px-6 py-2.5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50"
@@ -223,6 +324,20 @@ export function SettingsForm() {
             Keluar dari Semua Perangkat
           </button>
         </form>
+
+        <ConfirmDialog
+          open={bukaLogout}
+          bahaya
+          judul="Keluar dari semua perangkat?"
+          pesan="Semua sesi login di perangkat lain akan dimatikan. Perangkat ini tetap aktif."
+          labelKonfirmasi="Ya, Keluar"
+          onCancel={() => setBukaLogout(false)}
+          onConfirm={() => {
+            setBukaLogout(false);
+            logoutOk.current = true;
+            logoutFormRef.current?.requestSubmit();
+          }}
+        />
       </section>
     </div>
   );
