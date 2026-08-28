@@ -9,6 +9,7 @@
     "lint": "eslint",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx src/db/seed.ts",
+    "db:seed:bulk": "tsx scripts/seed-menu-bulk.ts",
     "db:setup-admin": "tsx src/db/setup-admin.ts"
   },
   "dependencies": {
