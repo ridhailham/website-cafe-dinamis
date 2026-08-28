@@ -1,9 +1,7 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ExternalLink } from "lucide-react";
-import {
-  logoutAction,
-} from "../actions";
+import { AdminNav } from "@/components/admin-nav";
+import { logoutAction } from "../actions";
 import { getActiveSession } from "@/lib/auth";
 
 export default async function PanelLayout({
@@ -25,30 +23,7 @@ export default async function PanelLayout({
                 Admin
               </span>
             </p>
-            <Link
-              href="/admin"
-              className="text-sm text-stone-600 hover:text-amber-700"
-            >
-              Kelola Menu
-            </Link>
-            <Link
-              href="/admin/galeri"
-              className="text-sm text-stone-600 hover:text-amber-700"
-            >
-              Kelola Galeri
-            </Link>
-            <Link
-              href="/admin/bisnis"
-              className="text-sm text-stone-600 hover:text-amber-700"
-            >
-              Kelola Bisnis
-            </Link>
-            <Link
-              href="/admin/pengaturan"
-              className="text-sm text-stone-600 hover:text-amber-700"
-            >
-              Pengaturan
-            </Link>
+            <AdminNav />
           </div>
 
           <div className="flex items-center gap-3">
