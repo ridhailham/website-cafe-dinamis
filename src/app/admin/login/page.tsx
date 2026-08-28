@@ -1,11 +1,17 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { LoginForm } from "./login-form";
+import { getActiveSession } from "@/lib/auth";
 
 export const metadata = {
   title: "Login Admin — Kopi Senja",
 };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  if (await getActiveSession()) {
+    redirect("/admin");
+  }
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-stone-100 px-4">
       <div className="w-full max-w-sm rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
