@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { GalleryItem } from "@/db/schema";
 
 type Props = { items: GalleryItem[] };
@@ -23,12 +22,12 @@ export function Gallery({ items }: Props) {
                 key={foto.id}
                 className="group relative aspect-[4/3] overflow-hidden rounded-2xl"
               >
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={foto.gambarUrl}
                   alt={foto.alt || "Foto galeri Kopi Senja"}
-                  fill
-                  sizes="(max-width: 768px) 50vw, 33vw"
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
             ))
