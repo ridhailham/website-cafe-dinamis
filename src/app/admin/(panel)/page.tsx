@@ -4,7 +4,8 @@ import { Pencil, Plus } from "lucide-react";
 import { db } from "@/db";
 import { menuItems } from "@/db/schema";
 import { DeleteButton } from "../delete-button";
-import { AdminToast, pesanOk } from "../alert";
+import { AdminToast } from "../alert";
+import { pesanOk } from "../messages";
 import { formatHarga } from "@/lib/constants";
 
 export const metadata = {

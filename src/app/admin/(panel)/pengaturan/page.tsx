@@ -1,5 +1,6 @@
 import { SettingsForm } from "../../pengaturan-form";
-import { AdminToast, pesanOk } from "../../alert";
+import { AdminToast } from "../../alert";
+import { pesanOk } from "../../messages";
 
 export const metadata = {
   title: "Pengaturan — Admin Kopi Senja",

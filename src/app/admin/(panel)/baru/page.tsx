@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { MenuForm } from "../../menu-form";
-import {
-  AdminToast,
-  pesanError,
-} from "../../alert";
+import { AdminToast } from "../../alert";
+import { pesanError } from "../../messages";
 
 export const metadata = {
   title: "Tambah Menu — Admin Kopi Senja",

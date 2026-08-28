@@ -4,7 +4,8 @@ import { Pencil, Plus } from "lucide-react";
 import { db } from "@/db";
 import { galleryItems } from "@/db/schema";
 import { DeleteGalleryButton } from "../../delete-gallery-button";
-import { AdminToast, pesanOk } from "../../alert";
+import { AdminToast } from "../../alert";
+import { pesanOk } from "../../messages";
 
 export const metadata = {
   title: "Kelola Galeri — Admin Kopi Senja",

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { GaleriForm } from "../../../galeri-form";
-import { AdminToast, pesanError } from "../../../alert";
+import { AdminToast } from "../../../alert";
+import { pesanError } from "../../../messages";
 
 export const metadata = {
   title: "Tambah Foto Galeri — Admin Kopi Senja",

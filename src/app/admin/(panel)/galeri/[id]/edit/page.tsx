@@ -5,7 +5,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { galleryItems } from "@/db/schema";
 import { GaleriForm } from "../../../../galeri-form";
-import { AdminToast, pesanError } from "../../../../alert";
+import { AdminToast } from "../../../../alert";
+import { pesanError } from "../../../../messages";
 
 export const metadata = {
   title: "Edit Foto Galeri — Admin Kopi Senja",

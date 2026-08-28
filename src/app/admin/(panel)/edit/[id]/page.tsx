@@ -5,7 +5,8 @@ import { ArrowLeft } from "lucide-react";
 import { db } from "@/db";
 import { menuItems } from "@/db/schema";
 import { MenuForm } from "../../../menu-form";
-import { AdminToast, pesanError } from "../../../alert";
+import { AdminToast } from "../../../alert";
+import { pesanError } from "../../../messages";
 
 export const metadata = {
   title: "Edit Menu — Admin Kopi Senja",
